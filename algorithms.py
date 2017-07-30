@@ -1,9 +1,10 @@
 import random
+import copy
 from collections import deque
 
 SIMULATION_SPEED = 1
 NUMBER_OF_PROCESSES = 10
-GANTT = {}  # A set of arrays indicating process completion for each algorithm
+GANTT = {}
 TIME_QUANTUM = 3
 
 
@@ -71,8 +72,7 @@ class Simulation():
         # Generate Process instances and add them to the pool
         # pid is assigned sequentially
         for pid in range(1, NUMBER_OF_PROCESSES):
-            temp_process = Process(pid)
-            self.process_pool.add(temp_process)
+            self.process_pool.add(Process(pid))
 
     def pprint_process_pool(self):
         processes = sorted(self.process_pool)
@@ -80,18 +80,26 @@ class Simulation():
             print 'pid %s: Arrival time: %s, Burst Time: %s, Prio: %s, remainingburst: %s' % (
                 process.pid, process.arrival_time, process.burst_time, process.priority, process.remaining_burst_time)
 
-class FirstComeFirstServe():
-    def __init__(self, simulation):
-        self.name = 'First Come First Serve'
-        self.simulation = simulation
-        self.deque = deque()
+
+class Algorithm():
+    def __init__(self):
+        pass
 
     def check_process_arrivals(self, time):
         """ Add process to deque the process if arrival time matches current time """
 
-        for process in simulation.process_pool:
+        for process in self.simulation.process_pool:
             if time == process.arrival_time:
                 self.deque.append(process)
+
+
+class FirstComeFirstServe(Algorithm):
+    def __init__(self, simulation):
+        Algorithm.__init__(self)
+
+        self.name = 'First Come First Serve'
+        self.simulation = copy.deepcopy(simulation)
+        self.deque = deque()
 
     def get_first_process(self):
         try:
@@ -100,19 +108,13 @@ class FirstComeFirstServe():
             return  # noop
 
 
-class ShortestJobFirst():
+class ShortestJobFirst(Algorithm):
     def __init__(self, simulation):
+        Algorithm.__init__(self)
+
         self.name = 'Shortest Job First'
-        self.simulation = simulation
-
+        self.simulation = copy.deepcopy(simulation)
         self.deque = deque()
-
-    def check_process_arrivals(self, time):
-        """ Add processes to deque the process if arrival time matches current time """
-
-        for process in self.simulation.process_pool:
-            if time == process.arrival_time:
-                self.deque.append(process)
 
     def remove_expired_jobs_from_pool(self):
         try:
@@ -137,19 +139,13 @@ class ShortestJobFirst():
             return  # noop
 
 
-class ShortestRemainingTimeFirst():
+class ShortestRemainingTimeFirst(Algorithm):
     def __init__(self, simulation):
+        Algorithm.__init__(self)
+
         self.name = 'Shortest Remaining Time First'
-        self.simulation = simulation
-
+        self.simulation = copy.deepcopy(simulation)
         self.deque = deque()
-
-    def check_process_arrivals(self, time):
-        """ Add processes to deque the process if arrival time matches current time """
-
-        for process in self.simulation.process_pool:
-            if time == process.arrival_time:
-                self.deque.append(process)
 
     def remove_expired_jobs_from_pool(self):
         try:
@@ -174,20 +170,14 @@ class ShortestRemainingTimeFirst():
             return  # noop
 
 
-class RoundRobin():
+class RoundRobin(Algorithm):
     def __init__(self, simulation):
-        self.name = 'RoundRobin'
-        self.simulation = simulation
+        Algorithm.__init__(self)
 
+        self.name = 'RoundRobin'
+        self.simulation = copy.deepcopy(simulation)
         self.current_round_robin_process_index = 0
         self.deque = deque()
-
-    def check_process_arrivals(self, time):
-        """ Add processes to deque the process if arrival time matches current time """
-
-        for process in self.simulation.process_pool:
-            if time == process.arrival_time:
-                self.deque.append(process)
 
     def get_current_process(self):
         return self.deque[self.current_round_robin_process_index]
@@ -218,19 +208,13 @@ class RoundRobin():
             return  # noop
 
 
-class PriorityScheduling():
+class PriorityScheduling(Algorithm):
     def __init__(self, simulation):
+        Algorithm.__init__(self)
+
         self.name = 'Priority Scheduling'
         self.simulation = simulation
-
         self.deque = deque()
-
-    def check_process_arrivals(self, time):
-        """ Add processes to deque the process if arrival time matches current time """
-
-        for process in self.simulation.process_pool:
-            if time == process.arrival_time:
-                self.deque.append(process)
 
     def remove_expired_jobs_from_pool(self):
         try:
@@ -274,67 +258,66 @@ if __name__ == '__main__':
         cpu.decrement_process()
         cpu.record_gantt(FCFS.name)
 
-    # ''' Shortest Job First '''
-    # cpu.reset()  # Reset cpu for next algorithm simulation
-    # SJF = ShortestJobFirst(simulation)
-    #
-    # for time in range(0, 100):
-    #     SJF.check_process_arrivals(time)
-    #     SJF.remove_expired_jobs_from_pool()
-    #
-    #     #  Non-premptive algorithm
-    #     if cpu.is_process_complete():
-    #         cpu.ingest_process(SJF.get_shortest_job_from_pool())
-    #
-    #     cpu.decrement_process()
-    #     cpu.record_gantt(SJF.name)
+    ''' Shortest Job First '''
+    cpu.reset()  # Reset cpu for next algorithm simulation
+    SJF = ShortestJobFirst(simulation)
 
-    # ''' Shortest Remaining Time First '''
-    # cpu.reset()  # Reset cpu for next algorithm simulation
-    # SRTF = ShortestRemainingTimeFirst(simulation)
-    #
-    # for time in range(0, 100):
-    #     SRTF.check_process_arrivals(time)
-    #     SRTF.remove_expired_jobs_from_pool()
-    #
-    #     cpu.ingest_process(SRTF.get_shortest_remaining_time_from_pool())
-    #     cpu.decrement_process()
-    #     cpu.record_gantt(SRTF.name)
+    for time in range(0, 100):
+        SJF.check_process_arrivals(time)
+        SJF.remove_expired_jobs_from_pool()
 
-    # ''' Round Robin '''
-    #
-    # cpu.reset()  # Reset cpu for next algorithm simulation
-    # RR = RoundRobin(simulation)
-    # current_time_quantum = 0
-    # current_process = None
-    #
-    # for time in range(0, 100):
-    #     RR.check_process_arrivals(time)
-    #
-    #     if current_process is None or current_time_quantum >= TIME_QUANTUM or current_process.remaining_burst_time == 0:
-    #         current_process = RR.get_next_process()
-    #         current_time_quantum = 0
-    #     else:
-    #         current_process = RR.get_current_process()
-    #
-    #     cpu.ingest_process(current_process)
-    #
-    #     cpu.decrement_process()
-    #     cpu.record_gantt(RR.name)
-    #
-    #     current_time_quantum += 1
+        #  Non-premptive algorithm
+        if cpu.is_process_complete():
+            cpu.ingest_process(SJF.get_shortest_job_from_pool())
 
-    # ''' Priority Scheduling '''
-    #
-    # cpu.reset()  # Reset cpu for next algorithm simulation
-    # PS = PriorityScheduling(simulation)
-    #
-    # for time in range(0, 100):
-    #     PS.check_process_arrivals(time)
-    #     PS.remove_expired_jobs_from_pool()
-    #
-    #     cpu.ingest_process(PS.get_lowest_priority_from_pool())
-    #     cpu.decrement_process()
-    #     cpu.record_gantt(PS.name)
+        cpu.decrement_process()
+        cpu.record_gantt(SJF.name)
+
+    ''' Shortest Remaining Time First '''
+    cpu.reset()  # Reset cpu for next algorithm simulation
+    SRTF = ShortestRemainingTimeFirst(simulation)
+
+    for time in range(0, 100):
+        SRTF.check_process_arrivals(time)
+        SRTF.remove_expired_jobs_from_pool()
+
+        cpu.ingest_process(SRTF.get_shortest_remaining_time_from_pool())
+        cpu.decrement_process()
+        cpu.record_gantt(SRTF.name)
+
+    ''' Round Robin '''
+    cpu.reset()  # Reset cpu for next algorithm simulation
+    RR = RoundRobin(simulation)
+
+    current_time_quantum = 0
+    current_process = None
+    for time in range(0, 100):
+        RR.check_process_arrivals(time)
+
+        if current_process is None or current_time_quantum >= TIME_QUANTUM or current_process.remaining_burst_time == 0:
+            current_process = RR.get_next_process()
+            current_time_quantum = 0
+        else:
+            current_process = RR.get_current_process()
+
+        cpu.ingest_process(current_process)
+
+        cpu.decrement_process()
+        cpu.record_gantt(RR.name)
+
+        current_time_quantum += 1
+
+    ''' Priority Scheduling '''
+
+    cpu.reset()  # Reset cpu for next algorithm simulation
+    PS = PriorityScheduling(simulation)
+
+    for time in range(0, 100):
+        PS.check_process_arrivals(time)
+        PS.remove_expired_jobs_from_pool()
+
+        cpu.ingest_process(PS.get_lowest_priority_from_pool())
+        cpu.decrement_process()
+        cpu.record_gantt(PS.name)
 
     print GANTT
