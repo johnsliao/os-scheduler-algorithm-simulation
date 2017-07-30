@@ -2,10 +2,24 @@ import random
 import copy
 from collections import deque
 
+MAX_SIMULATION_TIME = 100
 SIMULATION_SPEED = 1
 NUMBER_OF_PROCESSES = 10
+RESULTS = {}
 GANTT = {}
 TIME_QUANTUM = 3
+
+FIRST_COME_FIRST_SERVE = 'First Come First Serve'
+SHORTEST_JOB_FIRST = 'Shortest Job First'
+SHORTEST_REMAINING_TIME_FIRST = 'Shortest Remaining Time First'
+ROUND_ROBIN = 'Round Robin'
+PRIORITY_SCHEDULING = 'Priority Scheduling'
+
+ALGORITHMS = [FIRST_COME_FIRST_SERVE,
+              SHORTEST_JOB_FIRST,
+              SHORTEST_REMAINING_TIME_FIRST,
+              ROUND_ROBIN,
+              PRIORITY_SCHEDULING]
 
 
 class CPU:
@@ -27,6 +41,17 @@ class CPU:
     def decrement_process(self):
         if self.process is not None:
             self.process.remaining_burst_time -= 1
+
+    def record_process_start_time(self, time):
+        if self.process is not None:
+            if self.process.burst_time == self.process.remaining_burst_time:
+                self.process.start_time = time
+
+    def record_process_finish_time(self, time):
+        if self.process is not None:
+            if self.process.finished is not True and self.process.remaining_burst_time == 0:
+                self.process.finish_time = time
+                self.process.finished = True
 
     def record_gantt(self, algorithm):
 
@@ -51,8 +76,11 @@ class Process:
         self.burst_time = 0
         self.remaining_burst_time = 0
         self.priority = 0
-        self.start = 0
+        self.start_time = 0
+        self.finish_time = 0
+        self.waiting = 0
 
+        self.finished = False
         self.setup()
 
     def setup(self):
@@ -65,7 +93,6 @@ class Process:
 class Simulation():
     def __init__(self):
         self.process_pool = set()
-
         self.setup()
 
     def setup(self):
@@ -92,12 +119,35 @@ class Algorithm():
             if time == process.arrival_time:
                 self.deque.append(process)
 
+    def calculate_results(self):
+        total_waiting_time = 0
+        total_turnaround_time = 0
+
+        for process in self.simulation.process_pool:
+            waiting_time = process.start_time - process.arrival_time
+            turnaround_time = process.finish_time - process.arrival_time
+
+            total_waiting_time += waiting_time
+            total_turnaround_time += turnaround_time
+
+            RESULTS.update({self.name: {
+                process.pid: {
+                    'waiting_time': waiting_time,
+                    'turnaround_time': turnaround_time,
+                }
+            }})
+
+        RESULTS.update({self.name: {
+            'average_waiting_time': float(total_waiting_time) / NUMBER_OF_PROCESSES,
+            'average_turnaround_time': float(total_turnaround_time) / NUMBER_OF_PROCESSES,
+        }})
+
 
 class FirstComeFirstServe(Algorithm):
     def __init__(self, simulation):
         Algorithm.__init__(self)
 
-        self.name = 'First Come First Serve'
+        self.name = FIRST_COME_FIRST_SERVE
         self.simulation = copy.deepcopy(simulation)
         self.deque = deque()
 
@@ -112,7 +162,7 @@ class ShortestJobFirst(Algorithm):
     def __init__(self, simulation):
         Algorithm.__init__(self)
 
-        self.name = 'Shortest Job First'
+        self.name = SHORTEST_JOB_FIRST
         self.simulation = copy.deepcopy(simulation)
         self.deque = deque()
 
@@ -143,7 +193,7 @@ class ShortestRemainingTimeFirst(Algorithm):
     def __init__(self, simulation):
         Algorithm.__init__(self)
 
-        self.name = 'Shortest Remaining Time First'
+        self.name = SHORTEST_REMAINING_TIME_FIRST
         self.simulation = copy.deepcopy(simulation)
         self.deque = deque()
 
@@ -174,7 +224,7 @@ class RoundRobin(Algorithm):
     def __init__(self, simulation):
         Algorithm.__init__(self)
 
-        self.name = 'RoundRobin'
+        self.name = ROUND_ROBIN
         self.simulation = copy.deepcopy(simulation)
         self.current_round_robin_process_index = 0
         self.deque = deque()
@@ -212,7 +262,7 @@ class PriorityScheduling(Algorithm):
     def __init__(self, simulation):
         Algorithm.__init__(self)
 
-        self.name = 'Priority Scheduling'
+        self.name = PRIORITY_SCHEDULING
         self.simulation = simulation
         self.deque = deque()
 
@@ -241,28 +291,30 @@ class PriorityScheduling(Algorithm):
 
 if __name__ == '__main__':
     simulation = Simulation()
-    simulation.pprint_process_pool()
+    #simulation.pprint_process_pool()
     cpu = CPU()
 
     ''' First Come First Serve '''
     cpu.reset()  # Reset cpu for next algorithm simulation
     FCFS = FirstComeFirstServe(simulation)
 
-    for time in range(0, 100):
+    for time in range(0, MAX_SIMULATION_TIME):
         FCFS.check_process_arrivals(time)
 
         #  Non-premptive algorithm
         if cpu.is_process_complete():
             cpu.ingest_process(FCFS.get_first_process())
 
+        cpu.record_process_start_time(time)
         cpu.decrement_process()
+        cpu.record_process_finish_time(time)
         cpu.record_gantt(FCFS.name)
 
     ''' Shortest Job First '''
     cpu.reset()  # Reset cpu for next algorithm simulation
     SJF = ShortestJobFirst(simulation)
 
-    for time in range(0, 100):
+    for time in range(0, MAX_SIMULATION_TIME):
         SJF.check_process_arrivals(time)
         SJF.remove_expired_jobs_from_pool()
 
@@ -270,19 +322,23 @@ if __name__ == '__main__':
         if cpu.is_process_complete():
             cpu.ingest_process(SJF.get_shortest_job_from_pool())
 
+        cpu.record_process_start_time(time)
         cpu.decrement_process()
+        cpu.record_process_finish_time(time)
         cpu.record_gantt(SJF.name)
 
     ''' Shortest Remaining Time First '''
     cpu.reset()  # Reset cpu for next algorithm simulation
     SRTF = ShortestRemainingTimeFirst(simulation)
 
-    for time in range(0, 100):
+    for time in range(0, MAX_SIMULATION_TIME):
         SRTF.check_process_arrivals(time)
         SRTF.remove_expired_jobs_from_pool()
 
         cpu.ingest_process(SRTF.get_shortest_remaining_time_from_pool())
+        cpu.record_process_start_time(time)
         cpu.decrement_process()
+        cpu.record_process_finish_time(time)
         cpu.record_gantt(SRTF.name)
 
     ''' Round Robin '''
@@ -291,7 +347,7 @@ if __name__ == '__main__':
 
     current_time_quantum = 0
     current_process = None
-    for time in range(0, 100):
+    for time in range(0, MAX_SIMULATION_TIME):
         RR.check_process_arrivals(time)
 
         if current_process is None or current_time_quantum >= TIME_QUANTUM or current_process.remaining_burst_time == 0:
@@ -301,8 +357,9 @@ if __name__ == '__main__':
             current_process = RR.get_current_process()
 
         cpu.ingest_process(current_process)
-
+        cpu.record_process_start_time(time)
         cpu.decrement_process()
+        cpu.record_process_finish_time(time)
         cpu.record_gantt(RR.name)
 
         current_time_quantum += 1
@@ -312,12 +369,28 @@ if __name__ == '__main__':
     cpu.reset()  # Reset cpu for next algorithm simulation
     PS = PriorityScheduling(simulation)
 
-    for time in range(0, 100):
+    for time in range(0, MAX_SIMULATION_TIME):
         PS.check_process_arrivals(time)
         PS.remove_expired_jobs_from_pool()
 
         cpu.ingest_process(PS.get_lowest_priority_from_pool())
+        cpu.record_process_start_time(time)
         cpu.decrement_process()
+        cpu.record_process_finish_time(time)
         cpu.record_gantt(PS.name)
 
-    print GANTT
+    ''' Analysis '''
+    FCFS.calculate_results()
+    SJF.calculate_results()
+    SRTF.calculate_results()
+    RR.calculate_results()
+    PS.calculate_results()
+
+    ''' Compile the results to pass to the App '''
+    # TODO Fix the way results are saved and stored - pretty clunky
+    for algorithm in ALGORITHMS:
+        RESULTS[algorithm].update({
+            'GANTT': GANTT[algorithm],
+        })
+
+    print RESULTS
