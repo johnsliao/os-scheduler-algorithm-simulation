@@ -2,18 +2,39 @@ import random
 import copy
 from collections import deque
 
+PRIORITY_RANGE_MIN = 1
+
+PRIORITY_RANGE_MAX = 10
+
+BURST_TIME_RANGE_MAX = 10
+
+BURST_TIME_RANGE_MIN = 1
+
+ARRIVAL_TIME_RANGE_MIN = 0
+
+ARRIVAL_TIME_RANGE_MAX = 10
+
 MAX_SIMULATION_TIME = 100
+
 SIMULATION_SPEED = 1
+
 NUMBER_OF_PROCESSES = 10
-RESULTS = {}
-GANTT = {}
+
 TIME_QUANTUM = 3
 
 FIRST_COME_FIRST_SERVE = 'First Come First Serve'
+
 SHORTEST_JOB_FIRST = 'Shortest Job First'
+
 SHORTEST_REMAINING_TIME_FIRST = 'Shortest Remaining Time First'
+
 ROUND_ROBIN = 'Round Robin'
+
 PRIORITY_SCHEDULING = 'Priority Scheduling'
+
+RESULTS = {}
+
+GANTT = {}
 
 ALGORITHMS = [FIRST_COME_FIRST_SERVE,
               SHORTEST_JOB_FIRST,
@@ -78,15 +99,14 @@ class Process:
         self.priority = 0
         self.start_time = 0
         self.finish_time = 0
-        self.waiting = 0
 
         self.finished = False
         self.setup()
 
     def setup(self):
-        self.arrival_time = int(random.uniform(0, 10))
-        self.priority = int(random.uniform(1, 10))
-        self.burst_time = int(random.uniform(1, 10))
+        self.arrival_time = int(random.uniform(ARRIVAL_TIME_RANGE_MIN, ARRIVAL_TIME_RANGE_MAX))
+        self.priority = int(random.uniform(PRIORITY_RANGE_MIN, PRIORITY_RANGE_MAX))
+        self.burst_time = int(random.uniform(BURST_TIME_RANGE_MIN, BURST_TIME_RANGE_MAX))
         self.remaining_burst_time = self.burst_time
 
 
@@ -138,8 +158,8 @@ class Algorithm():
             }})
 
         RESULTS.update({self.name: {
-            'average_waiting_time': float(total_waiting_time) / NUMBER_OF_PROCESSES,
-            'average_turnaround_time': float(total_turnaround_time) / NUMBER_OF_PROCESSES,
+            'average_waiting_time': round(float(total_waiting_time) / NUMBER_OF_PROCESSES, 2),
+            'average_turnaround_time': round(float(total_turnaround_time) / NUMBER_OF_PROCESSES, 2),
         }})
 
 
@@ -289,9 +309,32 @@ class PriorityScheduling(Algorithm):
             return  # noop
 
 
-if __name__ == '__main__':
+def run_simulation(priority_range_max=PRIORITY_RANGE_MAX, burst_time_range_max=BURST_TIME_RANGE_MAX,
+                   arrival_time_range_max=ARRIVAL_TIME_RANGE_MAX,
+                   max_simulation_time=MAX_SIMULATION_TIME, time_quantum=TIME_QUANTUM,
+                   number_of_processes=NUMBER_OF_PROCESSES):
+    global NUMBER_OF_PROCESSES
+    NUMBER_OF_PROCESSES = number_of_processes
+
+    global PRIORITY_RANGE_MAX
+    PRIORITY_RANGE_MAX = priority_range_max
+
+    global BURST_TIME_RANGE_MAX
+    BURST_TIME_RANGE_MAX = burst_time_range_max
+
+    global ARRIVAL_TIME_RANGE_MAX
+    ARRIVAL_TIME_RANGE_MAX = arrival_time_range_max
+
+    global MAX_SIMULATION_TIME
+    MAX_SIMULATION_TIME = max_simulation_time
+
+    global TIME_QUANTUM
+    TIME_QUANTUM = time_quantum
+
+    print NUMBER_OF_PROCESSES
+
     simulation = Simulation()
-    #simulation.pprint_process_pool()
+    # simulation.pprint_process_pool()
     cpu = CPU()
 
     ''' First Come First Serve '''
@@ -393,4 +436,9 @@ if __name__ == '__main__':
             'GANTT': GANTT[algorithm],
         })
 
+    return RESULTS
+
+
+if __name__ == '__main__':
+    run_simulation()
     print RESULTS
