@@ -16,7 +16,7 @@ ARRIVAL_TIME_RANGE_MIN = 0
 
 ARRIVAL_TIME_RANGE_MAX = 10
 
-MAX_SIMULATION_TIME = 9999
+MAX_SIMULATION_TIME = 999
 
 SIMULATION_SPEED = 1
 
@@ -172,6 +172,11 @@ class Algorithm():
                     process.pid: {
                         'waiting_time': waiting_time,
                         'turnaround_time': turnaround_time,
+                        'arrival_time': process.arrival_time,
+                        'burst_time': process.burst_time,
+                        'priority': process.priority,
+                        'start_time': process.start_time,
+                        'finish_time': process.finish_time
                     }
                 })
             else:
@@ -179,6 +184,11 @@ class Algorithm():
                     process.pid: {
                         'waiting_time': waiting_time,
                         'turnaround_time': turnaround_time,
+                        'arrival_time': process.arrival_time,
+                        'burst_time': process.burst_time,
+                        'priority': process.priority,
+                        'start_time': process.start_time,
+                        'finish_time': process.finish_time,
                     }
                 }
 
@@ -352,6 +362,9 @@ def run_simulation(priority_range_max=PRIORITY_RANGE_MAX, burst_time_range_max=B
     global TIME_QUANTUM
     TIME_QUANTUM = time_quantum
 
+    global GANTT
+    GANTT = {}
+
     simulation = Simulation()
     cpu = CPU()
 
@@ -449,9 +462,9 @@ def run_simulation(priority_range_max=PRIORITY_RANGE_MAX, burst_time_range_max=B
 
     ''' Compile the results to pass to the App '''
     # TODO Fix the way results are saved and stored - pretty clunky
+    max_simulation_time = simulation.determine_simulation_time()
+    print 'FFF', max_simulation_time
     for algorithm in ALGORITHMS:
-        max_simulation_time = Simulation.determine_simulation_time()
-
         # Trimming the GANTT chart "None" tail
         parsed_gantt = GANTT[algorithm][0:max_simulation_time]
 

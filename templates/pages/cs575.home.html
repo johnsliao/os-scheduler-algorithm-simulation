@@ -10,6 +10,10 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
 
     <style type="text/css">
+        .table-responsive {
+            max-width:100%;
+        }
+
         #slider-number_of_processes {
              display: inline-block;
              margin: 0 10px;
@@ -70,6 +74,18 @@
              width: 25px;
         }
 
+        #fcfs {
+             width: 100vw;
+        }
+
+
+
+
+
+
+
+
+
 
     </style>
 
@@ -107,45 +123,125 @@
 </form>
 
 <div class="radio ">
-  <label><input type="radio" id="show_fcfs" name="optradio" checked="checked">First Come First Serve</label>
+    <label><input type="radio" id="show_fcfs" name="optradio" checked="checked">First Come First Serve</label>
 </div>
 <div class="radio">
-  <label><input type="radio" id="show_sjf" name="optradio">Shortest Job First</label>
+    <label><input type="radio" id="show_sjf" name="optradio">Shortest Job First</label>
 </div>
 <div class="radio">
-  <label><input type="radio" id="show_srtf" name="optradio">Shortest Remaining Time First</label>
+    <label><input type="radio" id="show_srtf" name="optradio">Shortest Remaining Time First</label>
 </div>
 <div class="radio">
-  <label><input type="radio" id="show_rr" name="optradio">Round Robin</label>
+    <label><input type="radio" id="show_rr" name="optradio">Round Robin</label>
 </div>
 <div class="radio disabled">
-  <label><input type="radio" id="show_ps" name="optradio" >Priority Scheduling</label>
+    <label><input type="radio" id="show_ps" name="optradio">Priority Scheduling</label>
 </div>
 
 <div id="fcfs">
-    <canvas id="fcfs_waiting_chart" width="600" height="400"></canvas>
-    <canvas id="fcfs_turnaround_chart" width="600" height="400"></canvas>
+    <canvas id="fcfs_waiting_chart"></canvas>
+    <canvas id="fcfs_turnaround_chart"></canvas>
+    <br>
+    <div class="panel-body table-responsive">
+        <table class="table">
+            <tr>
+                <th>pid</th>
+                {% for p in labels %}
+                <td>{{ p }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <th>turnaround_time</th>
+                {% for p in labels %}
+                <td>{{ results['First Come First Serve'][p]['turnaround_time'] }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <th>finish_time</th>
+                {% for p in labels %}
+                <td>{{ results['First Come First Serve'][p]['finish_time'] }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <th>start_time</th>
+                {% for p in labels %}
+                <td>{{ results['First Come First Serve'][p]['start_time'] }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <th>priority</th>
+                {% for p in labels %}
+                <td>{{ results['First Come First Serve'][p]['priority'] }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <th>arrival_time</th>
+                {% for p in labels %}
+                <td>{{ results['First Come First Serve'][p]['arrival_time'] }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <th>burst_time</th>
+                {% for p in labels %}
+                <td>{{ results['First Come First Serve'][p]['burst_time'] }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <th>waiting_time</th>
+                {% for p in labels %}
+                <td>{{ results['First Come First Serve'][p]['waiting_time'] }}</td>
+                {% endfor %}
+            </tr>
+
+        </table>
+    </div>
 </div>
 
 <div id="sjf">
-    <canvas id="sjf_waiting_chart" width="600" height="400"></canvas>
-    <canvas id="sjf_turnaround_chart" width="600" height="400"></canvas>
+    <canvas id="sjf_waiting_chart" width="300" height="200"></canvas>
+    <canvas id="sjf_turnaround_chart" width="300" height="200"></canvas>
 </div>
 
 <div id="srtf">
-    <canvas id="srtf_waiting_chart" width="600" height="400"></canvas>
-    <canvas id="srtf_turnaround_chart" width="600" height="400"></canvas>
+    <canvas id="srtf_waiting_chart" width="300" height="200"></canvas>
+    <canvas id="srtf_turnaround_chart" width="300" height="200"></canvas>
 </div>
 
 <div id="rr">
-    <canvas id="rr_waiting_chart" width="600" height="400"></canvas>
-    <canvas id="rr_turnaround_chart" width="600" height="400"></canvas>
+    <canvas id="rr_waiting_chart" width="300" height="200"></canvas>
+    <canvas id="rr_turnaround_chart" width="300" height="200"></canvas>
 </div>
 
 <div id="ps">
-    <canvas id="ps_waiting_chart" width="600" height="400"></canvas>
-    <canvas id="ps_turnaround_chart" width="600" height="400"></canvas>
+    <canvas id="ps_waiting_chart" width="300" height="200"></canvas>
+    <canvas id="ps_turnaround_chart" width="300" height="200"></canvas>
 </div>
+
+<br><br>
+GANTT CHART
+
+<table border="1">
+    <tr>
+        <th>first_come_first_serve</th>
+        <td>{{ results['First Come First Serve']['GANTT'] }}</td>
+    </tr>
+    <tr>
+        <th>shortest_job_first</th>
+        <td>{{ results['Shortest Job First']['GANTT'] }}</td>
+    </tr>
+    <tr>
+        <th>shortest_remaining_time_first</th>
+        <td>{{ results['Shortest Remaining Time First']['GANTT'] }}</td>
+    </tr>
+    <tr>
+        <th>round_robin</th>
+        <td>{{ results['Round Robin']['GANTT'] }}</td>
+    </tr>
+    <tr>
+        <th>priority_scheduling</th>
+        <td>{{ results['Priority Scheduling']['GANTT'] }}</td>
+    </tr>
+</table>
 
 
 <script type="text/javascript">
@@ -215,6 +311,7 @@ $(function() {
 });
 
 
+// START WAITING TIME CHART JS SECTION
 
 // bar chart data
    var barData = {
@@ -248,6 +345,303 @@ $(function() {
         barShowStroke : true,
         scaleShowLabels: true
    });
+
+   var barData = {
+   labels : [{% for item in labels %}
+                  "{{item}}",
+              {% endfor %}],
+   datasets : [
+      {
+            fillColor: "rgba(151,187,205,0.2)",
+            strokeColor: "rgba(151,187,205,1)",
+            pointColor: "rgba(151,187,205,1)",
+         data : [{% for item in sjf_values_waiting %}
+                      {{item}},
+                    {% endfor %}]
+      }
+      ]
+   }
+
+   // get bar chart canvas
+   var mychart = document.getElementById("sjf_waiting_chart").getContext("2d");
+
+   steps = 10
+   max = 10
+   // draw bar chart
+   new Chart(mychart).Bar(barData, {
+        scaleSteps: steps,
+        scaleStepWidth: Math.ceil(max / steps),
+        scaleStartValue: 0,
+        scaleShowVerticalLines: true,
+        scaleShowGridLines : true,
+        barShowStroke : true,
+        scaleShowLabels: true
+   });
+
+   var barData = {
+   labels : [{% for item in labels %}
+                  "{{item}}",
+              {% endfor %}],
+   datasets : [
+      {
+            fillColor: "rgba(151,187,205,0.2)",
+            strokeColor: "rgba(151,187,205,1)",
+            pointColor: "rgba(151,187,205,1)",
+         data : [{% for item in srtf_values_waiting %}
+                      {{item}},
+                    {% endfor %}]
+      }
+      ]
+   }
+
+   // get bar chart canvas
+   var mychart = document.getElementById("srtf_waiting_chart").getContext("2d");
+
+   steps = 10
+   max = 10
+   // draw bar chart
+   new Chart(mychart).Bar(barData, {
+        scaleSteps: steps,
+        scaleStepWidth: Math.ceil(max / steps),
+        scaleStartValue: 0,
+        scaleShowVerticalLines: true,
+        scaleShowGridLines : true,
+        barShowStroke : true,
+        scaleShowLabels: true
+   });
+
+   var barData = {
+   labels : [{% for item in labels %}
+                  "{{item}}",
+              {% endfor %}],
+   datasets : [
+      {
+            fillColor: "rgba(151,187,205,0.2)",
+            strokeColor: "rgba(151,187,205,1)",
+            pointColor: "rgba(151,187,205,1)",
+         data : [{% for item in rr_values_waiting %}
+                      {{item}},
+                    {% endfor %}]
+      }
+      ]
+   }
+
+   // get bar chart canvas
+   var mychart = document.getElementById("rr_waiting_chart").getContext("2d");
+
+   steps = 10
+   max = 10
+   // draw bar chart
+   new Chart(mychart).Bar(barData, {
+        scaleSteps: steps,
+        scaleStepWidth: Math.ceil(max / steps),
+        scaleStartValue: 0,
+        scaleShowVerticalLines: true,
+        scaleShowGridLines : true,
+        barShowStroke : true,
+        scaleShowLabels: true
+   });
+
+   var barData = {
+   labels : [{% for item in labels %}
+                  "{{item}}",
+              {% endfor %}],
+   datasets : [
+      {
+            fillColor: "rgba(151,187,205,0.2)",
+            strokeColor: "rgba(151,187,205,1)",
+            pointColor: "rgba(151,187,205,1)",
+         data : [{% for item in ps_values_waiting %}
+                      {{item}},
+                    {% endfor %}]
+      }
+      ]
+   }
+
+   // get bar chart canvas
+   var mychart = document.getElementById("ps_waiting_chart").getContext("2d");
+
+   steps = 10
+   max = 10
+   // draw bar chart
+   new Chart(mychart).Bar(barData, {
+        scaleSteps: steps,
+        scaleStepWidth: Math.ceil(max / steps),
+        scaleStartValue: 0,
+        scaleShowVerticalLines: true,
+        scaleShowGridLines : true,
+        barShowStroke : true,
+        scaleShowLabels: true
+   });
+
+// END WAITING TIME CHART JS SECTION
+
+// START TURNAROUND TIME CHART JS SECTION
+
+
+// bar chart data
+   var barData = {
+   labels : [{% for item in labels %}
+                  "{{item}}",
+              {% endfor %}],
+   datasets : [
+      {
+            fillColor: "rgba(151,187,205,0.2)",
+            strokeColor: "rgba(151,187,205,1)",
+            pointColor: "rgba(151,187,205,1)",
+         data : [{% for item in fcfs_values_turnaround %}
+                      {{item}},
+                    {% endfor %}]
+      }
+      ]
+   }
+
+   // get bar chart canvas
+   var mychart = document.getElementById("fcfs_turnaround_chart").getContext("2d");
+
+   steps = 10
+   max = 10
+   // draw bar chart
+   new Chart(mychart).Bar(barData, {
+        scaleSteps: steps,
+        scaleStepWidth: Math.ceil(max / steps),
+        scaleStartValue: 0,
+        scaleShowVerticalLines: true,
+        scaleShowGridLines : true,
+        barShowStroke : true,
+        scaleShowLabels: true
+   });
+
+   var barData = {
+   labels : [{% for item in labels %}
+                  "{{item}}",
+              {% endfor %}],
+   datasets : [
+      {
+            fillColor: "rgba(151,187,205,0.2)",
+            strokeColor: "rgba(151,187,205,1)",
+            pointColor: "rgba(151,187,205,1)",
+         data : [{% for item in sjf_values_turnaround %}
+                      {{item}},
+                    {% endfor %}]
+      }
+      ]
+   }
+
+   // get bar chart canvas
+   var mychart = document.getElementById("sjf_turnaround_chart").getContext("2d");
+
+   steps = 10
+   max = 10
+   // draw bar chart
+   new Chart(mychart).Bar(barData, {
+        scaleSteps: steps,
+        scaleStepWidth: Math.ceil(max / steps),
+        scaleStartValue: 0,
+        scaleShowVerticalLines: true,
+        scaleShowGridLines : true,
+        barShowStroke : true,
+        scaleShowLabels: true
+   });
+
+   var barData = {
+   labels : [{% for item in labels %}
+                  "{{item}}",
+              {% endfor %}],
+   datasets : [
+      {
+            fillColor: "rgba(151,187,205,0.2)",
+            strokeColor: "rgba(151,187,205,1)",
+            pointColor: "rgba(151,187,205,1)",
+         data : [{% for item in srtf_values_turnaround %}
+                      {{item}},
+                    {% endfor %}]
+      }
+      ]
+   }
+
+   // get bar chart canvas
+   var mychart = document.getElementById("srtf_turnaround_chart").getContext("2d");
+
+   steps = 10
+   max = 10
+   // draw bar chart
+   new Chart(mychart).Bar(barData, {
+        scaleSteps: steps,
+        scaleStepWidth: Math.ceil(max / steps),
+        scaleStartValue: 0,
+        scaleShowVerticalLines: true,
+        scaleShowGridLines : true,
+        barShowStroke : true,
+        scaleShowLabels: true
+   });
+
+   var barData = {
+   labels : [{% for item in labels %}
+                  "{{item}}",
+              {% endfor %}],
+   datasets : [
+      {
+            fillColor: "rgba(151,187,205,0.2)",
+            strokeColor: "rgba(151,187,205,1)",
+            pointColor: "rgba(151,187,205,1)",
+         data : [{% for item in rr_values_turnaround %}
+                      {{item}},
+                    {% endfor %}]
+      }
+      ]
+   }
+
+   // get bar chart canvas
+   var mychart = document.getElementById("rr_turnaround_chart").getContext("2d");
+
+   steps = 10
+   max = 10
+   // draw bar chart
+   new Chart(mychart).Bar(barData, {
+        scaleSteps: steps,
+        scaleStepWidth: Math.ceil(max / steps),
+        scaleStartValue: 0,
+        scaleShowVerticalLines: true,
+        scaleShowGridLines : true,
+        barShowStroke : true,
+        scaleShowLabels: true
+   });
+
+   var barData = {
+   labels : [{% for item in labels %}
+                  "{{item}}",
+              {% endfor %}],
+   datasets : [
+      {
+            fillColor: "rgba(151,187,205,0.2)",
+            strokeColor: "rgba(151,187,205,1)",
+            pointColor: "rgba(151,187,205,1)",
+         data : [{% for item in ps_values_turnaround %}
+                      {{item}},
+                    {% endfor %}]
+      }
+      ]
+   }
+
+   // get bar chart canvas
+   var mychart = document.getElementById("ps_turnaround_chart").getContext("2d");
+
+   steps = 10
+   max = 10
+   // draw bar chart
+   new Chart(mychart).Bar(barData, {
+        scaleSteps: steps,
+        scaleStepWidth: Math.ceil(max / steps),
+        scaleStartValue: 0,
+        scaleShowVerticalLines: true,
+        scaleShowGridLines : true,
+        barShowStroke : true,
+        scaleShowLabels: true
+   });
+
+
+// END TURNAROUND TIME CHART JS SECTION
 
 
 
@@ -294,6 +688,14 @@ function showPS() {
     document.getElementById("rr").style.display='none';
     document.getElementById("ps").style.display='block';
     }
+
+showFCFS()
+
+
+
+
+
+
 
 
 </script>

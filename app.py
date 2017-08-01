@@ -56,20 +56,18 @@ def home():
     params = [number_of_processes, priority_range_max, burst_time_range_max, arrival_time_range_max,
               time_quantum]
 
-    if None in params:
-        results = algorithms.run_simulation()
-    else:
-        number_of_processes = int(number_of_processes)
-        priority_range_max = int(priority_range_max)
-        burst_time_range_max = int(burst_time_range_max)
-        arrival_time_range_max = int(arrival_time_range_max)
-        time_quantum = int(time_quantum)
+    number_of_processes = int(number_of_processes)
+    priority_range_max = int(priority_range_max)
+    burst_time_range_max = int(burst_time_range_max)
+    arrival_time_range_max = int(arrival_time_range_max)
+    time_quantum = int(time_quantum)
 
-        results = algorithms.run_simulation(number_of_processes=number_of_processes,
-                                            priority_range_max=priority_range_max,
-                                            burst_time_range_max=burst_time_range_max,
-                                            arrival_time_range_max=arrival_time_range_max,
-                                            time_quantum=time_quantum)
+
+    results = algorithms.run_simulation(number_of_processes=number_of_processes,
+                                        priority_range_max=priority_range_max,
+                                        burst_time_range_max=burst_time_range_max,
+                                        arrival_time_range_max=arrival_time_range_max,
+                                        time_quantum=time_quantum)
 
     # Render the charts here
 
@@ -101,6 +99,9 @@ def home():
         srtf_values_turnaround.append(results['Shortest Remaining Time First'][p]['turnaround_time'])
         rr_values_turnaround.append(results['Round Robin'][p]['turnaround_time'])
         ps_values_turnaround.append(results['Priority Scheduling'][p]['turnaround_time'])
+
+    print fcfs_values_waiting
+    print labels
 
     return render_template('pages/cs575.home.html', results=results,
                            labels=labels,
