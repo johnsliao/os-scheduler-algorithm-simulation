@@ -7,14 +7,14 @@ Operating System Scheduling Algorithm Simulation
 Final Project for CS 575 - Operating Systems. Boston University MET College Summer 2017
 
 # Features
-- Visualization	of	the following	algorithms:
+- Visualization	of	the following	algorithms:  
 o First	come,	first	serve (FCFS) (Non-preemptive)  
 o Shortest	Job	First (SJF) (Non-preemptive)  
 o Shortest	Remaining	Time	First	(SRTF) (pre-emptive)  
 o Round	Robin (RR) (pre-emptive)  
 o Priority	Scheduling (PS) (pre-emptive)  
 
-- Adjustable	input	parameters:	 
+- Adjustable	input	parameters:  
 o #	processes  
 o time  
 o burst time max range  
