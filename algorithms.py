@@ -1,5 +1,7 @@
 import random
 import copy
+import pprint
+
 from collections import deque
 
 PRIORITY_RANGE_MIN = 1
@@ -118,7 +120,7 @@ class Simulation():
     def setup(self):
         # Generate Process instances and add them to the pool
         # pid is assigned sequentially
-        for pid in range(1, NUMBER_OF_PROCESSES):
+        for pid in range(1, NUMBER_OF_PROCESSES + 1):
             self.process_pool.add(Process(pid))
 
     def pprint_process_pool(self):
@@ -165,17 +167,25 @@ class Algorithm():
             total_waiting_time += waiting_time
             total_turnaround_time += turnaround_time
 
-            RESULTS.update({self.name: {
-                process.pid: {
-                    'waiting_time': waiting_time,
-                    'turnaround_time': turnaround_time,
+            if self.name in RESULTS:
+                RESULTS[self.name].update({
+                    process.pid: {
+                        'waiting_time': waiting_time,
+                        'turnaround_time': turnaround_time,
+                    }
+                })
+            else:
+                RESULTS[self.name] = {
+                    process.pid: {
+                        'waiting_time': waiting_time,
+                        'turnaround_time': turnaround_time,
+                    }
                 }
-            }})
 
-        RESULTS.update({self.name: {
+        RESULTS[self.name].update({
             'average_waiting_time': round(float(total_waiting_time) / NUMBER_OF_PROCESSES, 2),
             'average_turnaround_time': round(float(total_turnaround_time) / NUMBER_OF_PROCESSES, 2),
-        }})
+        })
 
 
 class FirstComeFirstServe(Algorithm):
@@ -342,10 +352,7 @@ def run_simulation(priority_range_max=PRIORITY_RANGE_MAX, burst_time_range_max=B
     global TIME_QUANTUM
     TIME_QUANTUM = time_quantum
 
-    print NUMBER_OF_PROCESSES
-
     simulation = Simulation()
-    # simulation.pprint_process_pool()
     cpu = CPU()
 
     ''' First Come First Serve '''
@@ -457,6 +464,5 @@ def run_simulation(priority_range_max=PRIORITY_RANGE_MAX, burst_time_range_max=B
 
 if __name__ == '__main__':
     run_simulation()
-    print RESULTS
-    MAX_SIMULATION_TIME = Simulation.determine_simulation_time()
-    print MAX_SIMULATION_TIME
+
+    pprint.pprint(RESULTS)

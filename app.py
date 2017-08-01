@@ -46,14 +46,15 @@ def login_required(test):
 
 @app.route('/')
 def home():
-    number_of_processes = request.args.get('number_of_processes')
-    priority_range_max = request.args.get('priority_range_max')
-    burst_time_range_max = request.args.get('burst_time_range_max')
-    arrival_time_range_max = request.args.get('arrival_time_range_max')
-    time_quantum = request.args.get('time_quantum')
+    number_of_processes = request.args.get('number_of_processes') if request.args.get('number_of_processes') else 10
+    priority_range_max = request.args.get('priority_range_max') if request.args.get('priority_range_max') else 10
+    burst_time_range_max = request.args.get('burst_time_range_max') if request.args.get('burst_time_range_max') else 10
+    arrival_time_range_max = request.args.get('arrival_time_range_max') if request.args.get(
+        'arrival_time_range_max') else 10
+    time_quantum = request.args.get('time_quantum') if request.args.get('time_quantum') else 3
 
     params = [number_of_processes, priority_range_max, burst_time_range_max, arrival_time_range_max,
-             time_quantum]
+              time_quantum]
 
     if None in params:
         results = algorithms.run_simulation()
@@ -70,14 +71,49 @@ def home():
                                             arrival_time_range_max=arrival_time_range_max,
                                             time_quantum=time_quantum)
 
-    print results
-
     # Render the charts here
 
-    labels = ["January", "February", "March", "April", "May", "June", "July", "August"]
-    values = [10, 9, 8, 7, 6, 4, 7, 8]
 
-    return render_template('pages/cs575.home.html', results=results, values=values, labels=labels)
+    #print results
+    labels = [p for p in range(1, number_of_processes + 1)]
+
+    fcfs_values_waiting = []
+    sjf_values_waiting = []
+    srtf_values_waiting = []
+    rr_values_waiting = []
+    ps_values_waiting = []
+
+    fcfs_values_turnaround = []
+    sjf_values_turnaround = []
+    srtf_values_turnaround = []
+    rr_values_turnaround = []
+    ps_values_turnaround = []
+
+    for p in labels:
+        fcfs_values_waiting.append(results['First Come First Serve'][p]['waiting_time'])
+        sjf_values_waiting.append(results['Shortest Job First'][p]['waiting_time'])
+        srtf_values_waiting.append(results['Shortest Remaining Time First'][p]['waiting_time'])
+        rr_values_waiting.append(results['Round Robin'][p]['waiting_time'])
+        ps_values_waiting.append(results['Priority Scheduling'][p]['waiting_time'])
+
+        fcfs_values_turnaround.append(results['First Come First Serve'][p]['turnaround_time'])
+        sjf_values_turnaround.append(results['Shortest Job First'][p]['turnaround_time'])
+        srtf_values_turnaround.append(results['Shortest Remaining Time First'][p]['turnaround_time'])
+        rr_values_turnaround.append(results['Round Robin'][p]['turnaround_time'])
+        ps_values_turnaround.append(results['Priority Scheduling'][p]['turnaround_time'])
+
+    return render_template('pages/cs575.home.html', results=results,
+                           labels=labels,
+                           fcfs_values_waiting=fcfs_values_waiting,
+                           sjf_values_waiting=sjf_values_waiting,
+                           srtf_values_waiting=srtf_values_waiting,
+                           rr_values_waiting=rr_values_waiting,
+                           ps_values_waiting=ps_values_waiting,
+                           fcfs_values_turnaround=fcfs_values_turnaround,
+                           sjf_values_turnaround=sjf_values_turnaround,
+                           srtf_values_turnaround=srtf_values_turnaround,
+                           rr_values_turnaround=rr_values_turnaround,
+                           ps_values_turnaround=ps_values_turnaround,)
 
 
 @app.route('/about')

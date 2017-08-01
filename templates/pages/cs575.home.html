@@ -105,7 +105,48 @@
         </div>
     </div>
 </form>
-<canvas id="chart" width="600" height="400"></canvas>
+
+<div class="radio ">
+  <label><input type="radio" id="show_fcfs" name="optradio" checked="checked">First Come First Serve</label>
+</div>
+<div class="radio">
+  <label><input type="radio" id="show_sjf" name="optradio">Shortest Job First</label>
+</div>
+<div class="radio">
+  <label><input type="radio" id="show_srtf" name="optradio">Shortest Remaining Time First</label>
+</div>
+<div class="radio">
+  <label><input type="radio" id="show_rr" name="optradio">Round Robin</label>
+</div>
+<div class="radio disabled">
+  <label><input type="radio" id="show_ps" name="optradio" >Priority Scheduling</label>
+</div>
+
+<div id="fcfs">
+    <canvas id="fcfs_waiting_chart" width="600" height="400"></canvas>
+    <canvas id="fcfs_turnaround_chart" width="600" height="400"></canvas>
+</div>
+
+<div id="sjf">
+    <canvas id="sjf_waiting_chart" width="600" height="400"></canvas>
+    <canvas id="sjf_turnaround_chart" width="600" height="400"></canvas>
+</div>
+
+<div id="srtf">
+    <canvas id="srtf_waiting_chart" width="600" height="400"></canvas>
+    <canvas id="srtf_turnaround_chart" width="600" height="400"></canvas>
+</div>
+
+<div id="rr">
+    <canvas id="rr_waiting_chart" width="600" height="400"></canvas>
+    <canvas id="rr_turnaround_chart" width="600" height="400"></canvas>
+</div>
+
+<div id="ps">
+    <canvas id="ps_waiting_chart" width="600" height="400"></canvas>
+    <canvas id="ps_turnaround_chart" width="600" height="400"></canvas>
+</div>
+
 
 <script type="text/javascript">
 $(function() {
@@ -175,7 +216,6 @@ $(function() {
 
 
 
-
 // bar chart data
    var barData = {
    labels : [{% for item in labels %}
@@ -186,7 +226,7 @@ $(function() {
             fillColor: "rgba(151,187,205,0.2)",
             strokeColor: "rgba(151,187,205,1)",
             pointColor: "rgba(151,187,205,1)",
-         data : [{% for item in values %}
+         data : [{% for item in fcfs_values_waiting %}
                       {{item}},
                     {% endfor %}]
       }
@@ -194,13 +234,12 @@ $(function() {
    }
 
    // get bar chart canvas
-   var mychart = document.getElementById("chart").getContext("2d");
+   var mychart = document.getElementById("fcfs_waiting_chart").getContext("2d");
 
    steps = 10
    max = 10
    // draw bar chart
    new Chart(mychart).Bar(barData, {
-        scaleOverride: true,
         scaleSteps: steps,
         scaleStepWidth: Math.ceil(max / steps),
         scaleStartValue: 0,
@@ -213,8 +252,48 @@ $(function() {
 
 
 
+document.getElementById("show_fcfs").addEventListener("click", showFCFS);
+document.getElementById("show_sjf").addEventListener("click", showSJF);
+document.getElementById("show_srtf").addEventListener("click", showSRTF);
+document.getElementById("show_rr").addEventListener("click", showRR);
+document.getElementById("show_ps").addEventListener("click", showPS);
 
+function showFCFS() {
+    document.getElementById("fcfs").style.display='block';
+    document.getElementById("sjf").style.display='none';
+    document.getElementById("srtf").style.display='none';
+    document.getElementById("rr").style.display='none';
+    document.getElementById("ps").style.display='none';
+    }
 
+function showSJF() {
+    document.getElementById("fcfs").style.display='none';
+    document.getElementById("sjf").style.display='block';
+    document.getElementById("srtf").style.display='none';
+    document.getElementById("rr").style.display='none';
+    document.getElementById("ps").style.display='none';
+    }
+function showSRTF() {
+    document.getElementById("fcfs").style.display='none';
+    document.getElementById("sjf").style.display='none';
+    document.getElementById("srtf").style.display='block';
+    document.getElementById("rr").style.display='none';
+    document.getElementById("ps").style.display='none';
+    }
+function showRR() {
+    document.getElementById("fcfs").style.display='none';
+    document.getElementById("sjf").style.display='none';
+    document.getElementById("srtf").style.display='none';
+    document.getElementById("rr").style.display='block';
+    document.getElementById("ps").style.display='none';
+    }
+function showPS() {
+    document.getElementById("fcfs").style.display='none';
+    document.getElementById("sjf").style.display='none';
+    document.getElementById("srtf").style.display='none';
+    document.getElementById("rr").style.display='none';
+    document.getElementById("ps").style.display='block';
+    }
 
 
 </script>
