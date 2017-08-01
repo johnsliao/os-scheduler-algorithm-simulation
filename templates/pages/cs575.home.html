@@ -74,9 +74,12 @@
              width: 25px;
         }
 
-        #fcfs {
+        #process_info {
              width: 100vw;
+             overflow:auto;
         }
+
+
 
 
 
@@ -142,8 +145,7 @@
     <canvas id="fcfs_waiting_chart"></canvas>
     <canvas id="fcfs_turnaround_chart"></canvas>
     <br>
-    <div class="panel-body table-responsive">
-        <table class="table">
+        <table>
             <tr>
                 <th>pid</th>
                 {% for p in labels %}
@@ -690,6 +692,8 @@ function showPS() {
     }
 
 showFCFS()
+
+
 
 
 
