@@ -14,7 +14,7 @@ ARRIVAL_TIME_RANGE_MIN = 0
 
 ARRIVAL_TIME_RANGE_MAX = 10
 
-MAX_SIMULATION_TIME = 100
+MAX_SIMULATION_TIME = 9999
 
 SIMULATION_SPEED = 1
 
@@ -126,6 +126,21 @@ class Simulation():
         for process in processes:
             print 'pid %s: Arrival time: %s, Burst Time: %s, Prio: %s, remainingburst: %s' % (
                 process.pid, process.arrival_time, process.burst_time, process.priority, process.remaining_burst_time)
+
+    @classmethod
+    def determine_simulation_time(self):
+        """ Determines the simulation time based on the latest None in GANTT chart"""
+
+        assert len(GANTT) != 0, 'GANTT chart is not populated yet'
+        indicies = []
+
+        for algorithm in GANTT:
+            # Counting backwards in GANTT for each algorithm
+            for i, x in reversed(list(enumerate(GANTT[algorithm]))):
+                if x is not None:  # If None value reached
+                    indicies.append(i + 1)
+
+        return max(indicies)
 
 
 class Algorithm():
@@ -310,8 +325,7 @@ class PriorityScheduling(Algorithm):
 
 
 def run_simulation(priority_range_max=PRIORITY_RANGE_MAX, burst_time_range_max=BURST_TIME_RANGE_MAX,
-                   arrival_time_range_max=ARRIVAL_TIME_RANGE_MAX,
-                   max_simulation_time=MAX_SIMULATION_TIME, time_quantum=TIME_QUANTUM,
+                   arrival_time_range_max=ARRIVAL_TIME_RANGE_MAX, time_quantum=TIME_QUANTUM,
                    number_of_processes=NUMBER_OF_PROCESSES):
     global NUMBER_OF_PROCESSES
     NUMBER_OF_PROCESSES = number_of_processes
@@ -324,9 +338,6 @@ def run_simulation(priority_range_max=PRIORITY_RANGE_MAX, burst_time_range_max=B
 
     global ARRIVAL_TIME_RANGE_MAX
     ARRIVAL_TIME_RANGE_MAX = arrival_time_range_max
-
-    global MAX_SIMULATION_TIME
-    MAX_SIMULATION_TIME = max_simulation_time
 
     global TIME_QUANTUM
     TIME_QUANTUM = time_quantum
@@ -432,8 +443,13 @@ def run_simulation(priority_range_max=PRIORITY_RANGE_MAX, burst_time_range_max=B
     ''' Compile the results to pass to the App '''
     # TODO Fix the way results are saved and stored - pretty clunky
     for algorithm in ALGORITHMS:
+        max_simulation_time = Simulation.determine_simulation_time()
+
+        # Trimming the GANTT chart "None" tail
+        parsed_gantt = GANTT[algorithm][0:max_simulation_time]
+
         RESULTS[algorithm].update({
-            'GANTT': GANTT[algorithm],
+            'GANTT': parsed_gantt,
         })
 
     return RESULTS
@@ -442,3 +458,5 @@ def run_simulation(priority_range_max=PRIORITY_RANGE_MAX, burst_time_range_max=B
 if __name__ == '__main__':
     run_simulation()
     print RESULTS
+    MAX_SIMULATION_TIME = Simulation.determine_simulation_time()
+    print MAX_SIMULATION_TIME

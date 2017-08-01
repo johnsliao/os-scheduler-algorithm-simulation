@@ -50,10 +50,9 @@ def home():
     priority_range_max = request.args.get('priority_range_max')
     burst_time_range_max = request.args.get('burst_time_range_max')
     arrival_time_range_max = request.args.get('arrival_time_range_max')
-    max_simulation_time = request.args.get('max_simulation_time')
     time_quantum = request.args.get('time_quantum')
 
-    params = [number_of_processes, priority_range_max, burst_time_range_max, arrival_time_range_max, max_simulation_time,
+    params = [number_of_processes, priority_range_max, burst_time_range_max, arrival_time_range_max,
              time_quantum]
 
     if None in params:
@@ -63,14 +62,12 @@ def home():
         priority_range_max = int(priority_range_max)
         burst_time_range_max = int(burst_time_range_max)
         arrival_time_range_max = int(arrival_time_range_max)
-        max_simulation_time = int(max_simulation_time)
         time_quantum = int(time_quantum)
 
         results = algorithms.run_simulation(number_of_processes=number_of_processes,
                                             priority_range_max=priority_range_max,
                                             burst_time_range_max=burst_time_range_max,
                                             arrival_time_range_max=arrival_time_range_max,
-                                            max_simulation_time=max_simulation_time,
                                             time_quantum=time_quantum)
 
     print results
