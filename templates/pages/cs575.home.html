@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Slider Input Demo</title>
+    <link rel="stylesheet" type="text/css"
+          href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css"/>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/jquery-ui.min.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
+
+    <style type="text/css">
+        #slider-number_of_processes {
+             display: inline-block;
+             margin: 0 10px;
+             width: 150px;
+        }
+
+        #number_of_processes {
+             width: 25px;
+        }
+
+        #slider-priority_range {
+             display: inline-block;
+             margin: 0 10px;
+             width: 150px;
+        }
+
+        #priority_range {
+             width: 25px;
+        }
+
+        #slider-burst_time_range_max {
+             display: inline-block;
+             margin: 0 10px;
+             width: 150px;
+        }
+
+        #burst_time_range_max {
+             width: 25px;
+        }
+
+        #slider-arrival_time_range_max {
+             display: inline-block;
+             margin: 0 10px;
+             width: 150px;
+        }
+
+        #arrival_time_range_max {
+             width: 25px;
+        }
+
+        #slider-max_simulation_time {
+             display: inline-block;
+             margin: 0 10px;
+             width: 150px;
+        }
+
+        #max_simulation_time {
+             width: 25px;
+        }
+
+        #slider-time_quantum {
+             display: inline-block;
+             margin: 0 10px;
+             width: 150px;
+        }
+
+        #time_quantum {
+             width: 25px;
+        }
+
+
+    </style>
+
+</head>
+<body>
+
+<form role="form" id="form-buscar">
+    <div class="form-group">
+        <div class="input-group">
+
+            <label for="number_of_processes">number_of_processes</label>
+            <input id="number_of_processes" class="form-control" type="text" name="number_of_processes"/>
+            <div id="slider-number_of_processes"></div>
+            <br>
+            <label for="priority_range">priority_range</label>
+            <input id="priority_range" class="form-control" type="text" name="priority_range_max"/>
+            <div id="slider-priority_range"></div>
+            <br>
+            <label for="burst_time_range_max">burst_time_range_max</label>
+            <input id="burst_time_range_max" class="form-control" type="text" name="burst_time_range_max"/>
+            <div id="slider-burst_time_range_max"></div>
+            <br>
+            <label for="arrival_time_range_max">arrival_time_range_max</label>
+            <input id="arrival_time_range_max" class="form-control" type="text" name="arrival_time_range_max"/>
+            <div id="slider-arrival_time_range_max"></div>
+            <br>
+            <label for="time_quantum">time_quantum</label>
+            <input id="time_quantum" class="form-control" type="text" name="time_quantum"/>
+            <div id="slider-time_quantum"></div>
+
+
+            <button class="btn btn-success" type="submit">start</button>
+        </div>
+    </div>
+</form>
+<canvas id="chart" width="600" height="400"></canvas>
+
+<script type="text/javascript">
+$(function() {
+     $( "#slider-number_of_processes" ).slider({
+          range: "min",
+          min: 1,
+          max: 100,
+          value: 10,
+          slide: function( event, ui ) {
+               $( "#number_of_processes" ).val( ui.value );
+          }
+     });
+     $("#number_of_processes").val($("#slider-number_of_processes").slider("value"));
+});
+
+$(function() {
+     $( "#slider-priority_range" ).slider({
+          range: "min",
+          min: 1,
+          max: 100,
+          value: 10,
+          slide: function( event, ui ) {
+               $( "#priority_range" ).val( ui.value );
+          }
+     });
+     $("#priority_range").val($("#slider-priority_range").slider("value"));
+});
+
+$(function() {
+     $( "#slider-burst_time_range_max" ).slider({
+          range: "min",
+          min: 1,
+          max: 100,
+          value: 10,
+          slide: function( event, ui ) {
+               $( "#burst_time_range_max" ).val( ui.value );
+          }
+     });
+     $("#burst_time_range_max").val($("#slider-burst_time_range_max").slider("value"));
+});
+
+$(function() {
+     $( "#slider-arrival_time_range_max" ).slider({
+          range: "min",
+          min: 1,
+          max: 100,
+          value: 10,
+          slide: function( event, ui ) {
+               $( "#arrival_time_range_max" ).val( ui.value );
+          }
+     });
+     $("#arrival_time_range_max").val($("#slider-arrival_time_range_max").slider("value"));
+});
+
+$(function() {
+     $( "#slider-time_quantum" ).slider({
+          range: "min",
+          min: 1,
+          max: 100,
+          value: 3,
+          slide: function( event, ui ) {
+               $( "#time_quantum" ).val( ui.value );
+          }
+     });
+     $("#time_quantum").val($("#slider-time_quantum").slider("value"));
+});
+
+
+
+
+// bar chart data
+   var barData = {
+   labels : [{% for item in labels %}
+                  "{{item}}",
+              {% endfor %}],
+   datasets : [
+      {
+            fillColor: "rgba(151,187,205,0.2)",
+            strokeColor: "rgba(151,187,205,1)",
+            pointColor: "rgba(151,187,205,1)",
+         data : [{% for item in values %}
+                      {{item}},
+                    {% endfor %}]
+      }
+      ]
+   }
+
+   // get bar chart canvas
+   var mychart = document.getElementById("chart").getContext("2d");
+
+   steps = 10
+   max = 10
+   // draw bar chart
+   new Chart(mychart).Bar(barData, {
+        scaleOverride: true,
+        scaleSteps: steps,
+        scaleStepWidth: Math.ceil(max / steps),
+        scaleStartValue: 0,
+        scaleShowVerticalLines: true,
+        scaleShowGridLines : true,
+        barShowStroke : true,
+        scaleShowLabels: true
+   });
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>
