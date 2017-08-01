@@ -1,7 +1,7 @@
 # os-scheduler-algorithm-simulation
 Operating System Scheduling Algorithm Simulation
 
-![alt text](http://i.imgur.com/msQ3POr.gif)
+![alt text](http://i.imgur.com/2mPGAy5.gif)
 
 # Background
 Final Project for CS 575 - Operating Systems. Boston University MET College Summer 2017
