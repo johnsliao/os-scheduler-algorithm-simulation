@@ -71,8 +71,8 @@ def home():
 
     # Render the charts here
 
-
     #print results
+
     labels = [p for p in range(1, number_of_processes + 1)]
 
     fcfs_values_waiting = []
@@ -100,8 +100,28 @@ def home():
         rr_values_turnaround.append(results['Round Robin'][p]['turnaround_time'])
         ps_values_turnaround.append(results['Priority Scheduling'][p]['turnaround_time'])
 
-    print fcfs_values_waiting
-    print labels
+
+
+    fcfs_values_waiting.append(results['First Come First Serve']['average_waiting_time'])
+    sjf_values_waiting.append(results['Shortest Job First']['average_waiting_time'])
+    srtf_values_waiting.append(results['Shortest Remaining Time First']['average_waiting_time'])
+    rr_values_waiting.append(results['Round Robin']['average_waiting_time'])
+    ps_values_waiting.append(results['Priority Scheduling']['average_waiting_time'])
+
+    fcfs_values_turnaround.append(results['First Come First Serve']['average_turnaround_time'])
+    sjf_values_turnaround.append(results['Shortest Job First']['average_turnaround_time'])
+    srtf_values_turnaround.append(results['Shortest Remaining Time First']['average_turnaround_time'])
+    rr_values_turnaround.append(results['Round Robin']['average_turnaround_time'])
+    ps_values_turnaround.append(results['Priority Scheduling']['average_turnaround_time'])
+
+
+    import copy
+    labels_graph_waiting = copy.deepcopy(labels)
+    labels_graph_turnaround = copy.deepcopy(labels)
+
+    labels_graph_waiting.append('avg')
+    labels_graph_turnaround.append('avg')
+
 
     return render_template('pages/cs575.home.html', results=results,
                            labels=labels,
@@ -114,7 +134,11 @@ def home():
                            sjf_values_turnaround=sjf_values_turnaround,
                            srtf_values_turnaround=srtf_values_turnaround,
                            rr_values_turnaround=rr_values_turnaround,
-                           ps_values_turnaround=ps_values_turnaround,)
+                           ps_values_turnaround=ps_values_turnaround,
+                           labels_graph_waiting=labels_graph_waiting,
+                           labels_graph_turnaround=labels_graph_turnaround,
+
+                           )
 
 
 @app.route('/about')

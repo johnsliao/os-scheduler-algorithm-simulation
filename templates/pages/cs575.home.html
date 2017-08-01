@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Slider Input Demo</title>
+    <title>OS Algorithm Scheduler Simulation</title>
     <link rel="stylesheet" type="text/css"
           href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css"/>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
@@ -10,6 +10,9 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
 
     <style type="text/css">
+            * {
+         font-family: Helvetica;
+        }
         .table-responsive {
             max-width:100%;
         }
@@ -79,7 +82,14 @@
              overflow:auto;
         }
 
-
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 5px;
+            text-align: left;
+        }
 
 
 
@@ -95,153 +105,417 @@
 </head>
 <body>
 
-<form role="form" id="form-buscar">
-    <div class="form-group">
-        <div class="input-group">
+<div align="center" style="float:left">
+    <form role="form" id="form-buscar">
+        <div class="form-group">
+            <div class="input-group">
+                <h1>Simulation Controls</h1>
+                <br>
+                <label for="number_of_processes">number_of_processes</label>
+                <input id="number_of_processes" class="form-control" type="text" name="number_of_processes"/>
+                <div id="slider-number_of_processes"></div>
+                <br>
+                <label for="priority_range">priority_range</label>
+                <input id="priority_range" class="form-control" type="text" name="priority_range_max"/>
+                <div id="slider-priority_range"></div>
+                <br>
+                <label for="burst_time_range_max">burst_time_range_max</label>
+                <input id="burst_time_range_max" class="form-control" type="text" name="burst_time_range_max"/>
+                <div id="slider-burst_time_range_max"></div>
+                <br>
+                <label for="arrival_time_range_max">arrival_time_range_max</label>
+                <input id="arrival_time_range_max" class="form-control" type="text" name="arrival_time_range_max"/>
+                <div id="slider-arrival_time_range_max"></div>
+                <br>
+                <label for="time_quantum">time_quantum</label>
+                <input id="time_quantum" class="form-control" type="text" name="time_quantum"/>
+                <div id="slider-time_quantum"></div>
 
-            <label for="number_of_processes">number_of_processes</label>
-            <input id="number_of_processes" class="form-control" type="text" name="number_of_processes"/>
-            <div id="slider-number_of_processes"></div>
-            <br>
-            <label for="priority_range">priority_range</label>
-            <input id="priority_range" class="form-control" type="text" name="priority_range_max"/>
-            <div id="slider-priority_range"></div>
-            <br>
-            <label for="burst_time_range_max">burst_time_range_max</label>
-            <input id="burst_time_range_max" class="form-control" type="text" name="burst_time_range_max"/>
-            <div id="slider-burst_time_range_max"></div>
-            <br>
-            <label for="arrival_time_range_max">arrival_time_range_max</label>
-            <input id="arrival_time_range_max" class="form-control" type="text" name="arrival_time_range_max"/>
-            <div id="slider-arrival_time_range_max"></div>
-            <br>
-            <label for="time_quantum">time_quantum</label>
-            <input id="time_quantum" class="form-control" type="text" name="time_quantum"/>
-            <div id="slider-time_quantum"></div>
-
-
-            <button class="btn btn-success" type="submit">start</button>
+                <br>
+                <button class="btn btn-success" type="submit">start simulation</button>
+            </div>
+        </div>
+    </form>
+    <br>
+    <div>
+        <div class="radio ">
+            <label><input type="radio" id="show_fcfs" name="optradio" checked="checked">First Come First Serve</label>
+        </div>
+        <div class="radio">
+            <label><input type="radio" id="show_sjf" name="optradio">Shortest Job First</label>
+        </div>
+        <div class="radio">
+            <label><input type="radio" id="show_srtf" name="optradio">Shortest Remaining Time First</label>
+        </div>
+        <div class="radio">
+            <label><input type="radio" id="show_rr" name="optradio">Round Robin</label>
+        </div>
+        <div class="radio disabled">
+            <label><input type="radio" id="show_ps" name="optradio">Priority Scheduling</label>
         </div>
     </div>
-</form>
-
-<div class="radio ">
-    <label><input type="radio" id="show_fcfs" name="optradio" checked="checked">First Come First Serve</label>
-</div>
-<div class="radio">
-    <label><input type="radio" id="show_sjf" name="optradio">Shortest Job First</label>
-</div>
-<div class="radio">
-    <label><input type="radio" id="show_srtf" name="optradio">Shortest Remaining Time First</label>
-</div>
-<div class="radio">
-    <label><input type="radio" id="show_rr" name="optradio">Round Robin</label>
-</div>
-<div class="radio disabled">
-    <label><input type="radio" id="show_ps" name="optradio">Priority Scheduling</label>
 </div>
 
-<div id="fcfs">
-    <canvas id="fcfs_waiting_chart"></canvas>
-    <canvas id="fcfs_turnaround_chart"></canvas>
-    <br>
-        <table>
-            <tr>
-                <th>pid</th>
-                {% for p in labels %}
-                <td>{{ p }}</td>
-                {% endfor %}
-            </tr>
-            <tr>
-                <th>turnaround_time</th>
-                {% for p in labels %}
-                <td>{{ results['First Come First Serve'][p]['turnaround_time'] }}</td>
-                {% endfor %}
-            </tr>
-            <tr>
-                <th>finish_time</th>
-                {% for p in labels %}
-                <td>{{ results['First Come First Serve'][p]['finish_time'] }}</td>
-                {% endfor %}
-            </tr>
-            <tr>
-                <th>start_time</th>
-                {% for p in labels %}
-                <td>{{ results['First Come First Serve'][p]['start_time'] }}</td>
-                {% endfor %}
-            </tr>
-            <tr>
-                <th>priority</th>
-                {% for p in labels %}
-                <td>{{ results['First Come First Serve'][p]['priority'] }}</td>
-                {% endfor %}
-            </tr>
-            <tr>
-                <th>arrival_time</th>
-                {% for p in labels %}
-                <td>{{ results['First Come First Serve'][p]['arrival_time'] }}</td>
-                {% endfor %}
-            </tr>
-            <tr>
-                <th>burst_time</th>
-                {% for p in labels %}
-                <td>{{ results['First Come First Serve'][p]['burst_time'] }}</td>
-                {% endfor %}
-            </tr>
-            <tr>
-                <th>waiting_time</th>
-                {% for p in labels %}
-                <td>{{ results['First Come First Serve'][p]['waiting_time'] }}</td>
-                {% endfor %}
-            </tr>
+<div id="fcfs" align="center">
+    <h1><u>First Come First Serve</u></h1>
 
-        </table>
-    </div>
+    <h4>Waiting Time Chart &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp;
+        &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp;&ensp; &ensp; &ensp; &ensp; &ensp; &ensp;
+        &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp;&ensp; &ensp; &ensp; &ensp; &ensp; &ensp;
+        &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp;&ensp; &ensp; &ensp; &ensp; &ensp;
+        &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; Turnaround Time Chart</h4>
+    <canvas id="fcfs_waiting_chart" width="800" height="300"></canvas>
+    <canvas id="fcfs_turnaround_chart" width="800" height="300"></canvas>
+    <br><br>
+    <table>
+        <tr>
+            <th>pid</th>
+            {% for p in labels %}
+            <td>{{ p }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>turnaround_time</th>
+            {% for p in labels %}
+            <td>{{ results['First Come First Serve'][p]['turnaround_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>finish_time</th>
+            {% for p in labels %}
+            <td>{{ results['First Come First Serve'][p]['finish_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>start_time</th>
+            {% for p in labels %}
+            <td>{{ results['First Come First Serve'][p]['start_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>priority</th>
+            {% for p in labels %}
+            <td>{{ results['First Come First Serve'][p]['priority'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>arrival_time</th>
+            {% for p in labels %}
+            <td>{{ results['First Come First Serve'][p]['arrival_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>burst_time</th>
+            {% for p in labels %}
+            <td>{{ results['First Come First Serve'][p]['burst_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>waiting_time</th>
+            {% for p in labels %}
+            <td>{{ results['First Come First Serve'][p]['waiting_time'] }}</td>
+            {% endfor %}
+        </tr>
+
+    </table>
 </div>
 
-<div id="sjf">
-    <canvas id="sjf_waiting_chart" width="300" height="200"></canvas>
-    <canvas id="sjf_turnaround_chart" width="300" height="200"></canvas>
+<div id="sjf" align="center">
+    <h1><u>Shortest Job First</u></h1>
+
+    <h4>Waiting Time Chart &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp;
+        &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp;&ensp; &ensp; &ensp; &ensp; &ensp; &ensp;
+        &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp;&ensp; &ensp; &ensp; &ensp; &ensp; &ensp;
+        &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp;&ensp; &ensp; &ensp; &ensp; &ensp;
+        &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; Turnaround Time Chart</h4>
+    <canvas id="sjf_waiting_chart" width="800" height="300"></canvas>
+    <canvas id="sjf_turnaround_chart"width="800" height="300"></canvas>
+    <br><br>
+    <table>
+        <tr>
+            <th>pid</th>
+            {% for p in labels %}
+            <td>{{ p }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>turnaround_time</th>
+            {% for p in labels %}
+            <td>{{ results['Shortest Job First'][p]['turnaround_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>finish_time</th>
+            {% for p in labels %}
+            <td>{{ results['Shortest Job First'][p]['finish_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>start_time</th>
+            {% for p in labels %}
+            <td>{{ results['Shortest Job First'][p]['start_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>priority</th>
+            {% for p in labels %}
+            <td>{{ results['Shortest Job First'][p]['priority'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>arrival_time</th>
+            {% for p in labels %}
+            <td>{{ results['Shortest Job First'][p]['arrival_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>burst_time</th>
+            {% for p in labels %}
+            <td>{{ results['Shortest Job First'][p]['burst_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>waiting_time</th>
+            {% for p in labels %}
+            <td>{{ results['Shortest Job First'][p]['waiting_time'] }}</td>
+            {% endfor %}
+        </tr>
+
+    </table>
 </div>
 
-<div id="srtf">
-    <canvas id="srtf_waiting_chart" width="300" height="200"></canvas>
-    <canvas id="srtf_turnaround_chart" width="300" height="200"></canvas>
+<div id="srtf" align="center">
+    <h1><u>Shortest Remaining Time First</u></h1>
+
+    <h4>Waiting Time Chart &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp;
+        &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp;&ensp; &ensp; &ensp; &ensp; &ensp; &ensp;
+        &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp;&ensp; &ensp; &ensp; &ensp; &ensp; &ensp;
+        &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp;&ensp; &ensp; &ensp; &ensp; &ensp;
+        &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; Turnaround Time Chart</h4>
+    <canvas id="srtf_waiting_chart" width="800" height="300"></canvas>
+    <canvas id="srtf_turnaround_chart" width="800" height="300"></canvas>
+    <br><br>
+    <table>
+        <tr>
+            <th>pid</th>
+            {% for p in labels %}
+            <td>{{ p }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>turnaround_time</th>
+            {% for p in labels %}
+            <td>{{ results['Shortest Remaining Time First'][p]['turnaround_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>finish_time</th>
+            {% for p in labels %}
+            <td>{{ results['Shortest Remaining Time First'][p]['finish_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>start_time</th>
+            {% for p in labels %}
+            <td>{{ results['Shortest Remaining Time First'][p]['start_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>priority</th>
+            {% for p in labels %}
+            <td>{{ results['Shortest Remaining Time First'][p]['priority'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>arrival_time</th>
+            {% for p in labels %}
+            <td>{{ results['Shortest Remaining Time First'][p]['arrival_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>burst_time</th>
+            {% for p in labels %}
+            <td>{{ results['Shortest Remaining Time First'][p]['burst_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>waiting_time</th>
+            {% for p in labels %}
+            <td>{{ results['Shortest Remaining Time First'][p]['waiting_time'] }}</td>
+            {% endfor %}
+        </tr>
+
+    </table>
 </div>
 
-<div id="rr">
-    <canvas id="rr_waiting_chart" width="300" height="200"></canvas>
-    <canvas id="rr_turnaround_chart" width="300" height="200"></canvas>
+<div id="rr" align="center">
+    <h1><u>Round Robin</u></h1>
+
+    <h4>Waiting Time Chart &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp;
+        &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp;&ensp; &ensp; &ensp; &ensp; &ensp; &ensp;
+        &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp;&ensp; &ensp; &ensp; &ensp; &ensp; &ensp;
+        &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp;&ensp; &ensp; &ensp; &ensp; &ensp;
+        &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; Turnaround Time Chart</h4>
+    <canvas id="rr_waiting_chart" width="800" height="300"></canvas>
+    <canvas id="rr_turnaround_chart" width="800" height="300"></canvas>
+    <br><br>
+    <table>
+        <tr>
+            <th>pid</th>
+            {% for p in labels %}
+            <td>{{ p }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>turnaround_time</th>
+            {% for p in labels %}
+            <td>{{ results['Round Robin'][p]['turnaround_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>finish_time</th>
+            {% for p in labels %}
+            <td>{{ results['Round Robin'][p]['finish_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>start_time</th>
+            {% for p in labels %}
+            <td>{{ results['Round Robin'][p]['start_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>priority</th>
+            {% for p in labels %}
+            <td>{{ results['Round Robin'][p]['priority'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>arrival_time</th>
+            {% for p in labels %}
+            <td>{{ results['Round Robin'][p]['arrival_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>burst_time</th>
+            {% for p in labels %}
+            <td>{{ results['Round Robin'][p]['burst_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>waiting_time</th>
+            {% for p in labels %}
+            <td>{{ results['First Come First Serve'][p]['waiting_time'] }}</td>
+            {% endfor %}
+        </tr>
+
+    </table>
 </div>
 
-<div id="ps">
-    <canvas id="ps_waiting_chart" width="300" height="200"></canvas>
-    <canvas id="ps_turnaround_chart" width="300" height="200"></canvas>
+<div id="ps" align="center">
+    <h1><u>Priority Scheduling</u></h1>
+
+    <h4>Waiting Time Chart &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp;
+        &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp;&ensp; &ensp; &ensp; &ensp; &ensp; &ensp;
+        &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp;&ensp; &ensp; &ensp; &ensp; &ensp; &ensp;
+        &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp;&ensp; &ensp; &ensp; &ensp; &ensp;
+        &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; &ensp; Turnaround Time Chart</h4>
+    <canvas id="ps_waiting_chart" width="800" height="300"></canvas>
+    <canvas id="ps_turnaround_chart" width="800" height="300"></canvas>
+    <br><br>
+    <table>
+        <tr>
+            <th>pid</th>
+            {% for p in labels %}
+            <td>{{ p }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>turnaround_time</th>
+            {% for p in labels %}
+            <td>{{ results['Priority Scheduling'][p]['turnaround_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>finish_time</th>
+            {% for p in labels %}
+            <td>{{ results['Priority Scheduling'][p]['finish_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>start_time</th>
+            {% for p in labels %}
+            <td>{{ results['Priority Scheduling'][p]['start_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>priority</th>
+            {% for p in labels %}
+            <td>{{ results['Priority Scheduling'][p]['priority'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>arrival_time</th>
+            {% for p in labels %}
+            <td>{{ results['Priority Scheduling'][p]['arrival_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>burst_time</th>
+            {% for p in labels %}
+            <td>{{ results['Priority Scheduling'][p]['burst_time'] }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>waiting_time</th>
+            {% for p in labels %}
+            <td>{{ results['Priority Scheduling'][p]['waiting_time'] }}</td>
+            {% endfor %}
+        </tr>
+
+    </table>
 </div>
 
 <br><br>
-GANTT CHART
+<hr>
+<h1 align="center">Results</h1>
 
-<table border="1">
+<table align="center">
+    <tr>
+        <th>algorithm</th>
+        <th>GANTT Chart</th>
+        <th>average_waiting_time</th>
+        <th>average_turnaround_time</th>
+    </tr>
     <tr>
         <th>first_come_first_serve</th>
         <td>{{ results['First Come First Serve']['GANTT'] }}</td>
+        <td>{{ results['First Come First Serve']['average_waiting_time'] }}</td>
+        <td>{{ results['First Come First Serve']['average_turnaround_time'] }}</td>
     </tr>
     <tr>
         <th>shortest_job_first</th>
         <td>{{ results['Shortest Job First']['GANTT'] }}</td>
+        <td>{{ results['Shortest Job First']['average_waiting_time'] }}</td>
+        <td>{{ results['Shortest Job First']['average_turnaround_time'] }}</td>
     </tr>
     <tr>
         <th>shortest_remaining_time_first</th>
         <td>{{ results['Shortest Remaining Time First']['GANTT'] }}</td>
+        <td>{{ results['Shortest Remaining Time First']['average_waiting_time'] }}</td>
+        <td>{{ results['Shortest Remaining Time First']['average_turnaround_time'] }}</td>
     </tr>
     <tr>
         <th>round_robin</th>
         <td>{{ results['Round Robin']['GANTT'] }}</td>
+        <td>{{ results['Round Robin']['average_waiting_time'] }}</td>
+        <td>{{ results['Round Robin']['average_turnaround_time'] }}</td>
     </tr>
     <tr>
         <th>priority_scheduling</th>
         <td>{{ results['Priority Scheduling']['GANTT'] }}</td>
+        <td>{{ results['Priority Scheduling']['average_waiting_time'] }}</td>
+        <td>{{ results['Priority Scheduling']['average_turnaround_time'] }}</td>
     </tr>
 </table>
 
@@ -317,7 +591,7 @@ $(function() {
 
 // bar chart data
    var barData = {
-   labels : [{% for item in labels %}
+   labels : [{% for item in labels_graph_waiting %}
                   "{{item}}",
               {% endfor %}],
    datasets : [
@@ -349,7 +623,7 @@ $(function() {
    });
 
    var barData = {
-   labels : [{% for item in labels %}
+   labels : [{% for item in labels_graph_waiting %}
                   "{{item}}",
               {% endfor %}],
    datasets : [
@@ -381,7 +655,7 @@ $(function() {
    });
 
    var barData = {
-   labels : [{% for item in labels %}
+   labels : [{% for item in labels_graph_waiting %}
                   "{{item}}",
               {% endfor %}],
    datasets : [
@@ -413,7 +687,7 @@ $(function() {
    });
 
    var barData = {
-   labels : [{% for item in labels %}
+   labels : [{% for item in labels_graph_waiting %}
                   "{{item}}",
               {% endfor %}],
    datasets : [
@@ -445,7 +719,7 @@ $(function() {
    });
 
    var barData = {
-   labels : [{% for item in labels %}
+   labels : [{% for item in labels_graph_waiting %}
                   "{{item}}",
               {% endfor %}],
    datasets : [
@@ -483,7 +757,7 @@ $(function() {
 
 // bar chart data
    var barData = {
-   labels : [{% for item in labels %}
+   labels : [{% for item in labels_graph_turnaround %}
                   "{{item}}",
               {% endfor %}],
    datasets : [
@@ -515,7 +789,7 @@ $(function() {
    });
 
    var barData = {
-   labels : [{% for item in labels %}
+   labels : [{% for item in labels_graph_turnaround %}
                   "{{item}}",
               {% endfor %}],
    datasets : [
@@ -547,7 +821,7 @@ $(function() {
    });
 
    var barData = {
-   labels : [{% for item in labels %}
+   labels : [{% for item in labels_graph_turnaround %}
                   "{{item}}",
               {% endfor %}],
    datasets : [
@@ -579,7 +853,7 @@ $(function() {
    });
 
    var barData = {
-   labels : [{% for item in labels %}
+   labels : [{% for item in labels_graph_turnaround %}
                   "{{item}}",
               {% endfor %}],
    datasets : [
@@ -611,7 +885,7 @@ $(function() {
    });
 
    var barData = {
-   labels : [{% for item in labels %}
+   labels : [{% for item in labels_graph_turnaround %}
                   "{{item}}",
               {% endfor %}],
    datasets : [
@@ -692,6 +966,14 @@ function showPS() {
     }
 
 showFCFS()
+
+
+
+
+
+
+
+
 
 
 
