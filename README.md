@@ -37,6 +37,9 @@ o process id chart
 
 - `python app.py`
 
+SE FOR SUBIR GAMBIARRADO:
+- `python app.py teste`
+
 - Navigate to `http://127.0.0.1:5000/`
 
 # Future

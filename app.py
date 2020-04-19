@@ -9,6 +9,7 @@ from logging import Formatter, FileHandler
 from forms import *
 import os
 import algorithms
+import sys
 
 # ----------------------------------------------------------------------------#
 # App Config.
@@ -53,6 +54,9 @@ def home():
         'arrival_time_range_max') else 10
     time_quantum = request.args.get('time_quantum') if request.args.get('time_quantum') else 3
 
+    if sys.argv[1]:
+        number_of_processes = 6
+
     params = [number_of_processes, priority_range_max, burst_time_range_max, arrival_time_range_max,
               time_quantum]
 
@@ -61,13 +65,14 @@ def home():
     burst_time_range_max = int(burst_time_range_max)
     arrival_time_range_max = int(arrival_time_range_max)
     time_quantum = int(time_quantum)
-
+    print number_of_processes
 
     results = algorithms.run_simulation(number_of_processes=number_of_processes,
                                         priority_range_max=priority_range_max,
                                         burst_time_range_max=burst_time_range_max,
                                         arrival_time_range_max=arrival_time_range_max,
-                                        time_quantum=time_quantum)
+                                        time_quantum=time_quantum,
+                                        random_generation=False if sys.argv[1] else True)
 
     # Render the charts here
 

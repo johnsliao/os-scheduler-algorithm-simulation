@@ -1,6 +1,11 @@
 import random
 import copy
 import pprint
+import json
+
+with open('process_config.json','r') as f:
+    process_config = json.load(f)
+
 
 from collections import deque
 
@@ -93,7 +98,7 @@ class CPU:
 
 
 class Process:
-    def __init__(self, pid):
+    def __init__(self, pid,random_generation):
         self.pid = pid
         self.arrival_time = 0
         self.burst_time = 0
@@ -103,25 +108,32 @@ class Process:
         self.finish_time = 0
 
         self.finished = False
-        self.setup()
-
-    def setup(self):
-        self.arrival_time = int(random.uniform(ARRIVAL_TIME_RANGE_MIN, ARRIVAL_TIME_RANGE_MAX))
-        self.priority = int(random.uniform(PRIORITY_RANGE_MIN, PRIORITY_RANGE_MAX))
-        self.burst_time = int(random.uniform(BURST_TIME_RANGE_MIN, BURST_TIME_RANGE_MAX))
+        self.setup(random_generation)
+    
+    def get_values(self,random_generation):
+        if random_generation:
+            return [int(random.uniform(ARRIVAL_TIME_RANGE_MIN, ARRIVAL_TIME_RANGE_MAX)),int(random.uniform(PRIORITY_RANGE_MIN, PRIORITY_RANGE_MAX)),int(random.uniform(BURST_TIME_RANGE_MIN, BURST_TIME_RANGE_MAX))]
+        else: 
+            return [int(process_config[self.pid-1]['arrival_time']),int(process_config[self.pid-1]['priority']),int(process_config[self.pid-1]['burst_time'])]
+    
+    def setup(self,random_generation):
+        values = self.get_values(random_generation)
+        self.arrival_time = values[0]
+        self.priority = values[1]
+        self.burst_time = values[2]
         self.remaining_burst_time = self.burst_time
 
 
 class Simulation():
-    def __init__(self):
+    def __init__(self,random_generation):
         self.process_pool = set()
-        self.setup()
+        self.setup(random_generation)
 
-    def setup(self):
+    def setup(self,random_generation):
         # Generate Process instances and add them to the pool
         # pid is assigned sequentially
         for pid in range(1, NUMBER_OF_PROCESSES + 1):
-            self.process_pool.add(Process(pid))
+            self.process_pool.add(Process(pid,random_generation))
 
     def pprint_process_pool(self):
         processes = sorted(self.process_pool)
@@ -346,9 +358,9 @@ class PriorityScheduling(Algorithm):
 
 def run_simulation(priority_range_max=PRIORITY_RANGE_MAX, burst_time_range_max=BURST_TIME_RANGE_MAX,
                    arrival_time_range_max=ARRIVAL_TIME_RANGE_MAX, time_quantum=TIME_QUANTUM,
-                   number_of_processes=NUMBER_OF_PROCESSES):
+                   number_of_processes=NUMBER_OF_PROCESSES,random_generation=True):
     global NUMBER_OF_PROCESSES
-    NUMBER_OF_PROCESSES = number_of_processes
+    NUMBER_OF_PROCESSES = number_of_processes if random_generation else len(process_config)
 
     global PRIORITY_RANGE_MAX
     PRIORITY_RANGE_MAX = priority_range_max
@@ -365,7 +377,7 @@ def run_simulation(priority_range_max=PRIORITY_RANGE_MAX, burst_time_range_max=B
     global GANTT
     GANTT = {}
 
-    simulation = Simulation()
+    simulation = Simulation(random_generation)
     cpu = CPU()
 
     ''' First Come First Serve '''

@@ -1,0 +1,20 @@
+[
+    {
+        "arrival_time": 0,"priority":10, "burst_time":8
+    },
+    {
+        "arrival_time": 1,"priority":5, "burst_time":4
+    },
+    {
+        "arrival_time": 2,"priority":8, "burst_time":9
+    },
+    {
+        "arrival_time": 3,"priority":3, "burst_time":5
+    },
+    {
+        "arrival_time": 4,"priority":12, "burst_time":10
+    },
+    {
+        "arrival_time": 5,"priority":2, "burst_time":14
+    }
+]
