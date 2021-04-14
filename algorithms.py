@@ -24,25 +24,27 @@ NUMBER_OF_PROCESSES = 10
 
 TIME_QUANTUM = 3
 
-FIRST_COME_FIRST_SERVE = 'First Come First Serve'
+FIRST_COME_FIRST_SERVE = "First Come First Serve"
 
-SHORTEST_JOB_FIRST = 'Shortest Job First'
+SHORTEST_JOB_FIRST = "Shortest Job First"
 
-SHORTEST_REMAINING_TIME_FIRST = 'Shortest Remaining Time First'
+SHORTEST_REMAINING_TIME_FIRST = "Shortest Remaining Time First"
 
-ROUND_ROBIN = 'Round Robin'
+ROUND_ROBIN = "Round Robin"
 
-PRIORITY_SCHEDULING = 'Priority Scheduling'
+PRIORITY_SCHEDULING = "Priority Scheduling"
 
 RESULTS = {}
 
 GANTT = {}
 
-ALGORITHMS = [FIRST_COME_FIRST_SERVE,
-              SHORTEST_JOB_FIRST,
-              SHORTEST_REMAINING_TIME_FIRST,
-              ROUND_ROBIN,
-              PRIORITY_SCHEDULING]
+ALGORITHMS = [
+    FIRST_COME_FIRST_SERVE,
+    SHORTEST_JOB_FIRST,
+    SHORTEST_REMAINING_TIME_FIRST,
+    ROUND_ROBIN,
+    PRIORITY_SCHEDULING,
+]
 
 
 class CPU:
@@ -72,7 +74,10 @@ class CPU:
 
     def record_process_finish_time(self, time):
         if self.process is not None:
-            if self.process.finished is not True and self.process.remaining_burst_time == 0:
+            if (
+                self.process.finished is not True
+                and self.process.remaining_burst_time == 0
+            ):
                 self.process.finish_time = time
                 self.process.finished = True
 
@@ -106,13 +111,17 @@ class Process:
         self.setup()
 
     def setup(self):
-        self.arrival_time = int(random.uniform(ARRIVAL_TIME_RANGE_MIN, ARRIVAL_TIME_RANGE_MAX))
+        self.arrival_time = int(
+            random.uniform(ARRIVAL_TIME_RANGE_MIN, ARRIVAL_TIME_RANGE_MAX)
+        )
         self.priority = int(random.uniform(PRIORITY_RANGE_MIN, PRIORITY_RANGE_MAX))
-        self.burst_time = int(random.uniform(BURST_TIME_RANGE_MIN, BURST_TIME_RANGE_MAX))
+        self.burst_time = int(
+            random.uniform(BURST_TIME_RANGE_MIN, BURST_TIME_RANGE_MAX)
+        )
         self.remaining_burst_time = self.burst_time
 
 
-class Simulation():
+class Simulation:
     def __init__(self):
         self.process_pool = set()
         self.setup()
@@ -126,14 +135,22 @@ class Simulation():
     def pprint_process_pool(self):
         processes = sorted(self.process_pool)
         for process in processes:
-            print 'pid %s: Arrival time: %s, Burst Time: %s, Prio: %s, remainingburst: %s' % (
-                process.pid, process.arrival_time, process.burst_time, process.priority, process.remaining_burst_time)
+            print (
+                "pid %s: Arrival time: %s, Burst Time: %s, Prio: %s, remainingburst: %s"
+                % (
+                    process.pid,
+                    process.arrival_time,
+                    process.burst_time,
+                    process.priority,
+                    process.remaining_burst_time,
+                )
+            )
 
     @classmethod
     def determine_simulation_time(self):
         """ Determines the simulation time based on the latest None in GANTT chart"""
 
-        assert len(GANTT) != 0, 'GANTT chart is not populated yet'
+        assert len(GANTT) != 0, "GANTT chart is not populated yet"
         indicies = []
 
         for algorithm in GANTT:
@@ -145,7 +162,7 @@ class Simulation():
         return max(indicies)
 
 
-class Algorithm():
+class Algorithm:
     def __init__(self):
         pass
 
@@ -168,34 +185,42 @@ class Algorithm():
             total_turnaround_time += turnaround_time
 
             if self.name in RESULTS:
-                RESULTS[self.name].update({
-                    process.pid: {
-                        'waiting_time': waiting_time,
-                        'turnaround_time': turnaround_time,
-                        'arrival_time': process.arrival_time,
-                        'burst_time': process.burst_time,
-                        'priority': process.priority,
-                        'start_time': process.start_time,
-                        'finish_time': process.finish_time
+                RESULTS[self.name].update(
+                    {
+                        process.pid: {
+                            "waiting_time": waiting_time,
+                            "turnaround_time": turnaround_time,
+                            "arrival_time": process.arrival_time,
+                            "burst_time": process.burst_time,
+                            "priority": process.priority,
+                            "start_time": process.start_time,
+                            "finish_time": process.finish_time,
+                        }
                     }
-                })
+                )
             else:
                 RESULTS[self.name] = {
                     process.pid: {
-                        'waiting_time': waiting_time,
-                        'turnaround_time': turnaround_time,
-                        'arrival_time': process.arrival_time,
-                        'burst_time': process.burst_time,
-                        'priority': process.priority,
-                        'start_time': process.start_time,
-                        'finish_time': process.finish_time,
+                        "waiting_time": waiting_time,
+                        "turnaround_time": turnaround_time,
+                        "arrival_time": process.arrival_time,
+                        "burst_time": process.burst_time,
+                        "priority": process.priority,
+                        "start_time": process.start_time,
+                        "finish_time": process.finish_time,
                     }
                 }
 
-        RESULTS[self.name].update({
-            'average_waiting_time': round(float(total_waiting_time) / NUMBER_OF_PROCESSES, 2),
-            'average_turnaround_time': round(float(total_turnaround_time) / NUMBER_OF_PROCESSES, 2),
-        })
+        RESULTS[self.name].update(
+            {
+                "average_waiting_time": round(
+                    float(total_waiting_time) / NUMBER_OF_PROCESSES, 2
+                ),
+                "average_turnaround_time": round(
+                    float(total_turnaround_time) / NUMBER_OF_PROCESSES, 2
+                ),
+            }
+        )
 
 
 class FirstComeFirstServe(Algorithm):
@@ -209,7 +234,7 @@ class FirstComeFirstServe(Algorithm):
     def get_first_process(self):
         try:
             return self.deque.popleft()
-        except Exception, e:
+        except Exception as e:
             return  # noop
 
 
@@ -226,7 +251,7 @@ class ShortestJobFirst(Algorithm):
             for process in self.deque:
                 if process.remaining_burst_time <= 0:
                     self.deque.remove(process)
-        except Exception, e:
+        except Exception as e:
             return  # noop
 
     def get_shortest_job_from_pool(self):
@@ -240,7 +265,7 @@ class ShortestJobFirst(Algorithm):
                     shortest_process_pid_time = process.burst_time
 
             return shortest_process
-        except IndexError, e:
+        except IndexError as e:
             return  # noop
 
 
@@ -257,7 +282,7 @@ class ShortestRemainingTimeFirst(Algorithm):
             for process in self.deque:
                 if process.remaining_burst_time <= 0:
                     self.deque.remove(process)
-        except Exception, e:
+        except Exception as e:
             return  # noop
 
     def get_shortest_remaining_time_from_pool(self):
@@ -266,12 +291,17 @@ class ShortestRemainingTimeFirst(Algorithm):
         shortest_process_pid_remaining_burst_time = 999
         try:
             for process in self.deque:
-                if process.remaining_burst_time < shortest_process_pid_remaining_burst_time:
+                if (
+                    process.remaining_burst_time
+                    < shortest_process_pid_remaining_burst_time
+                ):
                     shortest_remaining_burst_time_process = process
-                    shortest_process_pid_remaining_burst_time = process.remaining_burst_time
+                    shortest_process_pid_remaining_burst_time = (
+                        process.remaining_burst_time
+                    )
 
             return shortest_remaining_burst_time_process
-        except IndexError, e:
+        except IndexError as e:
             return  # noop
 
 
@@ -308,8 +338,8 @@ class RoundRobin(Algorithm):
                 self.current_round_robin_process_index = index
                 return self.deque[index]
 
-        except Exception, e:
-            print e
+        except Exception as e:
+            print (e)
             return  # noop
 
 
@@ -326,7 +356,7 @@ class PriorityScheduling(Algorithm):
             for process in self.deque:
                 if process.remaining_burst_time <= 0:
                     self.deque.remove(process)
-        except Exception, e:
+        except Exception as e:
             return  # noop
 
     def get_lowest_priority_from_pool(self):
@@ -340,13 +370,17 @@ class PriorityScheduling(Algorithm):
                     lowest_priority = process.priority
 
             return lowest_priority_process
-        except Exception, e:
+        except Exception as e:
             return  # noop
 
 
-def run_simulation(priority_range_max=PRIORITY_RANGE_MAX, burst_time_range_max=BURST_TIME_RANGE_MAX,
-                   arrival_time_range_max=ARRIVAL_TIME_RANGE_MAX, time_quantum=TIME_QUANTUM,
-                   number_of_processes=NUMBER_OF_PROCESSES):
+def run_simulation(
+    priority_range_max=PRIORITY_RANGE_MAX,
+    burst_time_range_max=BURST_TIME_RANGE_MAX,
+    arrival_time_range_max=ARRIVAL_TIME_RANGE_MAX,
+    time_quantum=TIME_QUANTUM,
+    number_of_processes=NUMBER_OF_PROCESSES,
+):
     global NUMBER_OF_PROCESSES
     NUMBER_OF_PROCESSES = number_of_processes
 
@@ -368,7 +402,7 @@ def run_simulation(priority_range_max=PRIORITY_RANGE_MAX, burst_time_range_max=B
     simulation = Simulation()
     cpu = CPU()
 
-    ''' First Come First Serve '''
+    """ First Come First Serve """
     cpu.reset()  # Reset cpu for next algorithm simulation
     FCFS = FirstComeFirstServe(simulation)
 
@@ -384,7 +418,7 @@ def run_simulation(priority_range_max=PRIORITY_RANGE_MAX, burst_time_range_max=B
         cpu.record_process_finish_time(time)
         cpu.record_gantt(FCFS.name)
 
-    ''' Shortest Job First '''
+    """ Shortest Job First """
     cpu.reset()  # Reset cpu for next algorithm simulation
     SJF = ShortestJobFirst(simulation)
 
@@ -401,7 +435,7 @@ def run_simulation(priority_range_max=PRIORITY_RANGE_MAX, burst_time_range_max=B
         cpu.record_process_finish_time(time)
         cpu.record_gantt(SJF.name)
 
-    ''' Shortest Remaining Time First '''
+    """ Shortest Remaining Time First """
     cpu.reset()  # Reset cpu for next algorithm simulation
     SRTF = ShortestRemainingTimeFirst(simulation)
 
@@ -415,7 +449,7 @@ def run_simulation(priority_range_max=PRIORITY_RANGE_MAX, burst_time_range_max=B
         cpu.record_process_finish_time(time)
         cpu.record_gantt(SRTF.name)
 
-    ''' Round Robin '''
+    """ Round Robin """
     cpu.reset()  # Reset cpu for next algorithm simulation
     RR = RoundRobin(simulation)
 
@@ -424,7 +458,11 @@ def run_simulation(priority_range_max=PRIORITY_RANGE_MAX, burst_time_range_max=B
     for time in range(0, MAX_SIMULATION_TIME):
         RR.check_process_arrivals(time)
 
-        if current_process is None or current_time_quantum >= TIME_QUANTUM or current_process.remaining_burst_time == 0:
+        if (
+            current_process is None
+            or current_time_quantum >= TIME_QUANTUM
+            or current_process.remaining_burst_time == 0
+        ):
             current_process = RR.get_next_process()
             current_time_quantum = 0
         else:
@@ -438,7 +476,7 @@ def run_simulation(priority_range_max=PRIORITY_RANGE_MAX, burst_time_range_max=B
 
         current_time_quantum += 1
 
-    ''' Priority Scheduling '''
+    """ Priority Scheduling """
 
     cpu.reset()  # Reset cpu for next algorithm simulation
     PS = PriorityScheduling(simulation)
@@ -453,29 +491,31 @@ def run_simulation(priority_range_max=PRIORITY_RANGE_MAX, burst_time_range_max=B
         cpu.record_process_finish_time(time)
         cpu.record_gantt(PS.name)
 
-    ''' Analysis '''
+    """ Analysis """
     FCFS.calculate_results()
     SJF.calculate_results()
     SRTF.calculate_results()
     RR.calculate_results()
     PS.calculate_results()
 
-    ''' Compile the results to pass to the App '''
+    """ Compile the results to pass to the App """
     # TODO Fix the way results are saved and stored - pretty clunky
     max_simulation_time = simulation.determine_simulation_time()
-    print 'FFF', max_simulation_time
+    print ("FFF", max_simulation_time)
     for algorithm in ALGORITHMS:
         # Trimming the GANTT chart "None" tail
         parsed_gantt = GANTT[algorithm][0:max_simulation_time]
 
-        RESULTS[algorithm].update({
-            'GANTT': parsed_gantt,
-        })
+        RESULTS[algorithm].update(
+            {
+                "GANTT": parsed_gantt,
+            }
+        )
 
     return RESULTS
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_simulation()
 
     pprint.pprint(RESULTS)
